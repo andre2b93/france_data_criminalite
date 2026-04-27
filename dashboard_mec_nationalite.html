@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nationalité des MEC — Analyse ISR France</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+<style>
+:root {
+  --bg:       #f5f6fa;
+  --card:     #ffffff;
+  --hdr:      #0f1b2d;
+  --hdr2:     #1a2e4a;
+  --accent:   #2563eb;
+  --accent2:  #dc2626;
+  --accent3:  #16a34a;
+  --amber:    #d97706;
+  --text:     #1e293b;
+  --muted:    #64748b;
+  --border:   #e2e8f0;
+  --radius:   10px;
+  --gap:      16px;
+  --fr-col:   #3b82f6;
+  --etr-col:  #ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,var(--hdr) 0%,var(--hdr2) 100%);color:#fff;padding:24px 32px 20px}
+.hdr h1{font-size:1.35rem;font-weight:700;letter-spacing:-.01em}
+.hdr .sub{color:#94a3b8;font-size:.82rem;margin-top:4px}
+.hdr .meta{display:flex;gap:24px;margin-top:14px;flex-wrap:wrap}
+.hdr .meta span{font-size:.78rem;color:#94a3b8}
+.hdr .meta b{color:#e2e8f0}
+
+/* DEFINITION BOX */
+.def-box{background:linear-gradient(90deg,#1e3a5f,#0f2a4a);margin:0;padding:12px 32px;
+  border-bottom:1px solid #1e3a5f;color:#93c5fd;font-size:.8rem;line-height:1.7}
+.def-box b{color:#60a5fa}
+
+/* FILTERS */
+.filter-bar{background:#fff;border-bottom:1px solid var(--border);padding:10px 32px;
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.filter-bar label{font-size:.78rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.filter-bar select{padding:6px 10px;border:1px solid var(--border);border-radius:6px;
+  font-size:.82rem;color:var(--text);background:#fff;cursor:pointer}
+.filter-bar select:focus{outline:none;border-color:var(--accent)}
+
+/* LAYOUT */
+.wrap{max-width:1400px;margin:0 auto;padding:var(--gap) 32px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--gap);margin-bottom:var(--gap)}
+.row2{display:grid;grid-template-columns:2fr 1fr;gap:var(--gap);margin-bottom:var(--gap)}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--gap);margin-bottom:var(--gap)}
+.row1{margin-bottom:var(--gap)}
+.card{background:var(--card);border-radius:var(--radius);padding:20px 22px;
+  box-shadow:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);border:1px solid var(--border)}
+.card h3{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.card canvas{max-height:280px}
+.card.tall canvas{max-height:360px}
+
+/* KPI CARDS */
+.kpi .val{font-size:2rem;font-weight:800;color:var(--accent);line-height:1}
+.kpi .val.red{color:var(--accent2)} .kpi .val.green{color:var(--accent3)} .kpi .val.amber{color:var(--amber)}
+.kpi .lbl{font-size:.73rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:5px}
+.kpi .delta{font-size:.76rem;margin-top:6px;font-weight:500}
+.kpi .delta.up{color:var(--accent2)} .kpi .delta.neutral{color:var(--muted)} .kpi .delta.down{color:var(--accent3)}
+.kpi .bar-wrap{margin-top:8px;background:#f1f5f9;border-radius:4px;height:6px;overflow:hidden}
+.kpi .bar-fill{height:100%;border-radius:4px;background:var(--accent2)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+thead th{padding:8px 10px;text-align:left;font-size:.72rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--muted);border-bottom:2px solid var(--border);
+  cursor:pointer;white-space:nowrap;user-select:none;background:#f8fafc}
+thead th:hover{color:var(--text)}
+tbody td{padding:9px 10px;border-bottom:1px solid #f1f5f9}
+tbody tr:hover{background:#f8fafc}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:600}
+.badge.hausse{background:#fef2f2;color:var(--accent2)}
+.badge.baisse{background:#f0fdf4;color:var(--accent3)}
+.badge.stable{background:#f8fafc;color:var(--muted)}
+.isr-bar-cell{display:flex;align-items:center;gap:6px}
+.isr-bar{height:8px;background:var(--accent2);border-radius:3px;min-width:2px}
+.note{font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.5}
+.legend-row{display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+footer{padding:16px 32px;color:var(--muted);font-size:.74rem;border-top:1px solid var(--border);margin-top:8px}
+@media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr)}.row2,.row3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>🇫🇷 Nationalité des Mis En Cause (MEC) — Analyse de surreprésentation</h1>
+  <div class="sub">Indice de Surreprésentation (ISR) : part des MEC étrangers rapportée à leur poids démographique</div>
+  <div class="meta">
+    <span>Source : <b>SSMSI / Police & Gendarmerie nationales</b> — data.gouv.fr</span>
+    <span>Démographie : <b>INSEE — Figure 2, part des étrangers dans la pop. totale</b></span>
+    <span>Période : <b>2016 – 2024</b></span>
+    <span>Périmètre : <b>17 indicateurs d'infractions élucidées</b></span>
+  </div>
+</div>
+
+<div class="def-box">
+  <b>ISR (Indice de Surreprésentation)</b> = (% MEC de nationalité étrangère) ÷ (% d'étrangers dans la population totale) &nbsp;·&nbsp;
+  <b>ISR = 1</b> : représentation proportionnelle &nbsp;·&nbsp;
+  <b>ISR &gt; 1</b> : surreprésentation &nbsp;·&nbsp;
+  <b>ISR &lt; 1</b> : sous-représentation &nbsp;·&nbsp;
+  <em>Champ : MEC pour infractions élucidées. La nationalité reflète le statut au moment des faits, pas la résidence.</em>
+</div>
+
+<div class="filter-bar">
+  <label>Indicateur</label>
+  <select id="filt-ind" onchange="updateAll()">
+    <option value="all">Tous les indicateurs</option>
+  </select>
+  <label>Année</label>
+  <select id="filt-yr" onchange="updateAll()">
+    <option value="all">Toutes les années</option>
+  </select>
+</div>
+
+<div class="wrap">
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="card kpi">
+      <div class="val red" id="kpi-isr">—</div>
+      <div class="lbl">ISR agrégé (toutes infractions)</div>
+      <div class="delta" id="kpi-isr-delta">—</div>
+    </div>
+    <div class="card kpi">
+      <div class="val red" id="kpi-pct-mec">—</div>
+      <div class="lbl">% MEC de nationalité étrangère</div>
+      <div class="bar-wrap"><div class="bar-fill" id="kpi-pct-mec-bar"></div></div>
+      <div class="delta neutral" id="kpi-pct-pop">vs — % dans la population</div>
+    </div>
+    <div class="card kpi">
+      <div class="val amber" id="kpi-nb-etr">—</div>
+      <div class="lbl">MEC étrangers (latest year)</div>
+      <div class="delta neutral" id="kpi-nb-total">sur — MEC au total</div>
+    </div>
+    <div class="card kpi">
+      <div class="val red" id="kpi-isr-max">—</div>
+      <div class="lbl" id="kpi-isr-max-lbl">ISR le plus élevé</div>
+      <div class="delta up" id="kpi-isr-max-ind">—</div>
+    </div>
+    <div class="card kpi">
+      <div class="val green" id="kpi-isr-min">—</div>
+      <div class="lbl" id="kpi-isr-min-lbl">ISR le plus faible</div>
+      <div class="delta down" id="kpi-isr-min-ind">—</div>
+    </div>
+  </div>
+
+  <!-- Row 2: ISR trend + ranking -->
+  <div class="row2">
+    <div class="card tall">
+      <h3>Évolution de l'ISR agrégé et du % MEC étrangers (2016–2024)</h3>
+      <div class="legend-row">
+        <div class="legend-item"><div class="dot" style="background:#ef4444"></div>ISR agrégé (axe droite)</div>
+        <div class="legend-item"><div class="dot" style="background:#3b82f6"></div>% MEC étrangers</div>
+        <div class="legend-item"><div class="dot" style="background:#94a3b8;opacity:.5"></div>% étrangers dans pop.</div>
+      </div>
+      <canvas id="chartTrend"></canvas>
+      <p class="note">ISR agrégé = (% MEC étrangers) ÷ (% étrangers dans la pop. totale). L'ISR se stabilise autour de 2,0–2,2 sur la période.</p>
+    </div>
+    <div class="card tall">
+      <h3>Classement ISR moyen par indicateur (2016–2024)</h3>
+      <canvas id="chartRanking"></canvas>
+      <p class="note">Ligne rouge = ISR 1 (représentation proportionnelle).</p>
+    </div>
+  </div>
+
+  <!-- Row 3: double bar + age pyramid + sex -->
+  <div class="row3">
+    <div class="card">
+      <h3>MEC étrangers vs français par année — volumes</h3>
+      <canvas id="chartStack"></canvas>
+      <p class="note">Barres empilées : Français (bleu) + Étrangers (rouge). Total sur infractions élucidées avec nationalité renseignée.</p>
+    </div>
+    <div class="card">
+      <h3>Répartition par tranche d'âge (2024) — % au sein de chaque groupe</h3>
+      <canvas id="chartAge"></canvas>
+      <p class="note">Comparaison de la structure par âge des MEC français et étrangers (2024, % intra-groupe).</p>
+    </div>
+    <div class="card">
+      <h3>Répartition hommes / femmes parmi les MEC (2024)</h3>
+      <canvas id="chartSex"></canvas>
+      <p class="note">Les MEC étrangers sont encore plus masculinisés (96,2 % H) que les MEC français (86,7 % H).</p>
+    </div>
+  </div>
+
+  <!-- ISR par indicateur × année (heatmap-style bar chart) -->
+  <div class="row2">
+    <div class="card tall">
+      <h3>ISR par indicateur et par année — <span id="ind-select-label">tous indicateurs (moyenne)</span></h3>
+      <canvas id="chartIndYear"></canvas>
+      <p class="note">Chaque ligne = évolution de l'ISR d'un indicateur. Utilisez le filtre "Indicateur" pour isoler une catégorie.</p>
+    </div>
+    <div class="card">
+      <h3>% MEC étrangers vs % dans la population (2024) — par indicateur</h3>
+      <canvas id="chartGap"></canvas>
+      <p class="note">L'écart entre les deux barres est proportionnel à la surreprésentation.</p>
+    </div>
+  </div>
+
+  <!-- Detail table -->
+  <div class="card row1">
+    <h3>Table détaillée par indicateur — tri interactif</h3>
+    <div class="tbl-wrap" id="detail-table"></div>
+    <p class="note">ISR moyen calculé sur la période 2016–2024. Tendance : pente de régression sur l'ISR annuel (▲ hausse / ▼ baisse / → stable).</p>
+  </div>
+
+</div><!-- /wrap -->
+
+<footer>
+  Sources : SSMSI (Police & Gendarmerie) — Caractéristiques des mis en cause, data.gouv.fr ·
+  INSEE — Part des étrangers dans la population totale (série longue) ·
+  Champ : France métropolitaine + DOM, infractions élucidées avec nationalité renseignée ·
+  Avertissement : les catégories "Français / Étranger" sont binaires — elles ne distinguent pas les différents statuts de séjour ni les nationalisations récentes.
+</footer>
+
+<script>
+const D = {"years": [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "total_mec": [839358, 869519, 899683, 896013, 843621, 957757, 1001020, 1049848, 1079613, 1122690], "total_etr": [116108, 127342, 140236, 143819, 139721, 161417, 177355, 176795, 180532, 182783], "total_fr": [723250, 742177, 759447, 752194, 703900, 796340, 823665, 873053, 899081, 939907], "pct_mec_etr": [13.83, 14.65, 15.59, 16.05, 16.56, 16.85, 17.72, 16.84, 16.72, 16.28], "pct_pop_etr": [6.8, 7.0, 7.2, 7.4, 7.6, 7.7, 7.8, 8.2, 8.8, NaN], "isr_agrege": [2.034, 2.093, 2.165, 2.169, 2.179, 2.188, 2.272, 2.054, 1.9, null], "ind_labels": ["Cambriolages de logement", "Vols dans les véhicules", "Vols violents sans arme", "Vols sans violence contre des personnes", "Vols d'accessoires sur les véhicules", "Tentatives d'homicide", "Vols avec arme", "Homicides", "Violences physiques dans le cadre intra-familial", "Trafic de stupéfiants", "Viols et tentatives de viols", "Violences physiques hors cadre intra-familial", "Escroqueries et fraudes aux moyens de paiement", "Violences sexuelles", "Destructions et dégradations volontaires", "Usage de stupéfiants", "Vols de véhicule"], "ind_isr": [4.55, 3.96, 3.96, 3.7, 2.67, 2.61, 2.6, 2.29, 2.2, 2.17, 1.89, 1.87, 1.83, 1.76, 1.5, 1.42, 1.2], "ind_pct_mec": [34.8, 31.2, 30.4, 28.2, 19.9, 19.8, 19.6, 17.7, 16.6, 17.2, 14.2, 14.4, 13.8, 13.2, 11.5, 11.0, 9.1], "ind_pct_pop": [7.6, 7.6, 7.6, 7.6, 7.6, 7.6, 7.6, 7.7, 7.6, 7.6, 7.6, 7.6, 7.6, 7.6, 7.6, 7.6, 7.6], "isr_by_year": {"Cambriolages de logement": {"2016": 3.825, "2017": 3.949, "2018": 4.697, "2019": 4.295, "2020": 4.745, "2021": 5.19, "2022": 5.309, "2023": 4.64, "2024": 4.26}, "Destructions et dégradations volontaires": {"2016": 1.44, "2017": 1.329, "2018": 1.443, "2019": 1.501, "2020": 1.549, "2021": 1.582, "2022": 1.64, "2023": 1.561, "2024": 1.45}, "Escroqueries et fraudes aux moyens de paiement": {"2016": 2.065, "2017": 2.02, "2018": 1.792, "2019": 1.769, "2020": 1.688, "2021": 1.856, "2022": 1.937, "2023": 1.902, "2024": 1.482}, "Homicides": {"2016": null, "2017": 2.11, "2018": 2.426, "2019": 2.489, "2020": 2.458, "2021": 2.399, "2022": 2.276, "2023": 2.12, "2024": 2.033}, "Tentatives d'homicide": {"2016": 2.751, "2017": 2.796, "2018": 2.703, "2019": 2.638, "2020": 2.804, "2021": 2.618, "2022": 2.776, "2023": 2.209, "2024": 2.226}, "Trafic de stupéfiants": {"2016": 1.806, "2017": 1.901, "2018": 2.111, "2019": 2.119, "2020": 1.98, "2021": 2.158, "2022": 2.479, "2023": 2.495, "2024": 2.459}, "Usage de stupéfiants": {"2016": 1.268, "2017": 1.324, "2018": 1.421, "2019": 1.458, "2020": 1.418, "2021": 1.487, "2022": 1.638, "2023": 1.379, "2024": 1.426}, "Violences physiques dans le cadre intra-familial": {"2016": 2.409, "2017": 2.38, "2018": 2.285, "2019": 2.241, "2020": 2.145, "2021": 2.206, "2022": 2.204, "2023": 2.048, "2024": 1.853}, "Violences physiques hors cadre intra-familial": {"2016": 1.824, "2017": 1.817, "2018": 1.856, "2019": 1.849, "2020": 1.918, "2021": 1.884, "2022": 2.045, "2023": 1.922, "2024": 1.744}, "Violences sexuelles": {"2016": 1.943, "2017": 1.953, "2018": 1.943, "2019": 1.865, "2020": 1.725, "2021": 1.684, "2022": 1.699, "2023": 1.573, "2024": 1.447}, "Viols et tentatives de viols": {"2016": 2.087, "2017": 2.123, "2018": 2.011, "2019": 2.053, "2020": 1.903, "2021": 1.819, "2022": 1.803, "2023": 1.688, "2024": 1.558}, "Vols avec arme": {"2016": 2.287, "2017": 2.561, "2018": 2.6, "2019": 2.591, "2020": 2.776, "2021": 2.839, "2022": 2.804, "2023": 2.491, "2024": 2.464}, "Vols d'accessoires sur les véhicules": {"2016": 2.344, "2017": 4.293, "2018": 1.71, "2019": 1.676, "2020": 2.184, "2021": 3.403, "2022": 3.442, "2023": 2.609, "2024": 2.38}, "Vols dans les véhicules": {"2016": 2.635, "2017": 3.12, "2018": 3.519, "2019": 3.662, "2020": 4.28, "2021": 4.413, "2022": 4.747, "2023": 4.862, "2024": 4.44}, "Vols de véhicule": {"2016": 1.109, "2017": 1.207, "2018": 1.074, "2019": 1.111, "2020": 1.254, "2021": 1.239, "2022": 1.321, "2023": 1.283, "2024": 1.232}, "Vols sans violence contre des personnes": {"2016": 3.312, "2017": 3.374, "2018": 3.613, "2019": 3.886, "2020": 3.784, "2021": 4.045, "2022": 4.214, "2023": 3.716, "2024": 3.327}, "Vols violents sans arme": {"2016": 3.122, "2017": 3.557, "2018": 4.124, "2019": 3.978, "2020": 4.717, "2021": 4.508, "2022": 4.518, "2023": 3.759, "2024": 3.352}}, "years_range": [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "age_labels": ["13 à 17 ans", "18 à 29 ans", "30 à 44 ans", "45 à 59 ans", "60 ans ou plus", "Moins de 13 ans"], "age_fr_pct": [12.3, 42.2, 28.6, 11.8, 3.4, 1.6], "age_etr_pct": [9.4, 40.9, 36.1, 11.0, 2.0, 0.5], "age_fr_abs": [110806, 378828, 257156, 105693, 30897, 14523], "age_etr_abs": [16950, 73822, 65074, 19932, 3684, 933], "sex_fr_h": 779220, "sex_fr_f": 119861, "sex_etr_h": 163548, "sex_etr_f": 16984, "detail_table": [{"indicateur": "Cambriolages de logement", "isr_moyen": 4.55, "pct_mec_etr": 34.8, "pct_pop": NaN, "nb_total": 32466, "tendance": "stable"}, {"indicateur": "Vols dans les véhicules", "isr_moyen": 3.96, "pct_mec_etr": 31.2, "pct_pop": NaN, "nb_total": 21202, "tendance": "hausse"}, {"indicateur": "Vols violents sans arme", "isr_moyen": 3.96, "pct_mec_etr": 30.4, "pct_pop": NaN, "nb_total": 13041, "tendance": "stable"}, {"indicateur": "Vols sans violence contre des personnes", "isr_moyen": 3.7, "pct_mec_etr": 28.2, "pct_pop": NaN, "nb_total": 64263, "tendance": "stable"}, {"indicateur": "Vols d'accessoires sur les véhicules", "isr_moyen": 2.67, "pct_mec_etr": 19.9, "pct_pop": NaN, "nb_total": 8317, "tendance": "stable"}, {"indicateur": "Tentatives d'homicide", "isr_moyen": 2.61, "pct_mec_etr": 19.8, "pct_pop": NaN, "nb_total": 3687, "tendance": "baisse"}, {"indicateur": "Vols avec arme", "isr_moyen": 2.6, "pct_mec_etr": 19.6, "pct_pop": NaN, "nb_total": 4934, "tendance": "stable"}, {"indicateur": "Homicides", "isr_moyen": 2.29, "pct_mec_etr": 17.7, "pct_pop": NaN, "nb_total": 1330, "tendance": "stable"}, {"indicateur": "Violences physiques dans le cadre intra-familial", "isr_moyen": 2.2, "pct_mec_etr": 16.6, "pct_pop": NaN, "nb_total": 202912, "tendance": "baisse"}, {"indicateur": "Trafic de stupéfiants", "isr_moyen": 2.17, "pct_mec_etr": 17.2, "pct_pop": NaN, "nb_total": 56621, "tendance": "hausse"}, {"indicateur": "Viols et tentatives de viols", "isr_moyen": 1.89, "pct_mec_etr": 14.2, "pct_pop": NaN, "nb_total": 30431, "tendance": "baisse"}, {"indicateur": "Violences physiques hors cadre intra-familial", "isr_moyen": 1.87, "pct_mec_etr": 14.4, "pct_pop": NaN, "nb_total": 139908, "tendance": "stable"}, {"indicateur": "Escroqueries et fraudes aux moyens de paiement", "isr_moyen": 1.83, "pct_mec_etr": 13.8, "pct_pop": NaN, "nb_total": 52982, "tendance": "baisse"}, {"indicateur": "Violences sexuelles", "isr_moyen": 1.76, "pct_mec_etr": 13.2, "pct_pop": NaN, "nb_total": 84937, "tendance": "baisse"}, {"indicateur": "Destructions et dégradations volontaires", "isr_moyen": 1.5, "pct_mec_etr": 11.5, "pct_pop": NaN, "nb_total": 73385, "tendance": "stable"}, {"indicateur": "Usage de stupéfiants", "isr_moyen": 1.42, "pct_mec_etr": 11.0, "pct_pop": NaN, "nb_total": 307206, "tendance": "stable"}, {"indicateur": "Vols de véhicule", "isr_moyen": 1.2, "pct_mec_etr": 9.1, "pct_pop": NaN, "nb_total": 25068, "tendance": "stable"}], "kpi_isr_2024": 1.9, "kpi_pct_mec_2024": 16.7, "kpi_pct_pop_2024": 8.8, "kpi_total_etr_2024": 180532, "kpi_total_mec_2024": 1079613, "kpi_isr_max_ind": "Cambriolages de logement", "kpi_isr_max_val": 4.55};
+
+// ── populate filters ──────────────────────────────────────────────────────────
+const selInd = document.getElementById('filt-ind');
+D.ind_labels.forEach(l => {
+  const o = document.createElement('option'); o.value = l; o.textContent = l; selInd.appendChild(o);
+});
+const selYr = document.getElementById('filt-yr');
+D.years_range.forEach(y => {
+  const o = document.createElement('option'); o.value = y; o.textContent = y; selYr.appendChild(o);
+});
+
+const FR = '#3b82f6', ETR = '#ef4444', MUTED = '#cbd5e1', GRID = '#f1f5f9';
+
+Chart.defaults.font.family = "-apple-system,'Segoe UI',Roboto,sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#64748b';
+
+function fmtN(n){ return n >= 1e6 ? (n/1e6).toFixed(2)+'M' : n >= 1e3 ? (n/1000).toFixed(1)+'k' : n; }
+
+// ── KPIs ─────────────────────────────────────────────────────────────────────
+function updateKPIs(ind, yr){
+  let isr, pctMec, pctPop, nbEtr, nbTot;
+
+  if(ind==='all'){
+    const i = yr==='all' ? D.years.indexOf(2024) : D.years.indexOf(+yr);
+    const idx = i >= 0 ? i : D.years.length-1;
+    isr    = D.isr_agrege[idx];
+    pctMec = D.pct_mec_etr[idx];
+    pctPop = D.pct_pop_etr[idx];
+    nbEtr  = D.total_etr[idx];
+    nbTot  = D.total_mec[idx];
+  } else {
+    const rows = D.detail_table.filter(r => r.indicateur === ind);
+    if(!rows.length) return;
+    isr    = rows[0].isr_moyen;
+    pctMec = rows[0].pct_mec_etr;
+    pctPop = rows[0].pct_pop;
+    nbEtr  = rows[0].nb_total ? Math.round(rows[0].nb_total * pctMec/100) : null;
+    nbTot  = rows[0].nb_total;
+  }
+
+  document.getElementById('kpi-isr').textContent      = isr ? isr.toFixed(2) : '—';
+  document.getElementById('kpi-pct-mec').textContent  = pctMec ? pctMec.toFixed(1)+'%' : '—';
+  document.getElementById('kpi-pct-pop').textContent  = pctPop ? 'vs '+pctPop.toFixed(1)+'% dans la population' : '';
+  document.getElementById('kpi-pct-mec-bar').style.width = pctMec ? Math.min(pctMec*2,100)+'%' : '0';
+  document.getElementById('kpi-nb-etr').textContent   = nbEtr ? fmtN(nbEtr) : '—';
+  document.getElementById('kpi-nb-total').textContent = nbTot ? 'sur '+fmtN(nbTot)+' MEC au total' : '';
+  document.getElementById('kpi-isr-delta').textContent = isr ?
+    (isr > 1 ? '×'+isr.toFixed(2)+' plus représentés que leur poids démo.' : 'représentation proportionnelle') : '';
+  document.getElementById('kpi-isr-delta').className = 'delta ' + (isr > 1.2 ? 'up' : 'down');
+
+  const sorted = [...D.detail_table].sort((a,b)=>b.isr_moyen-a.isr_moyen);
+  const top = sorted[0], bot = sorted[sorted.length-1];
+  document.getElementById('kpi-isr-max').textContent   = top.isr_moyen.toFixed(2);
+  document.getElementById('kpi-isr-max-ind').textContent = top.indicateur.length > 28 ? top.indicateur.slice(0,28)+'…' : top.indicateur;
+  document.getElementById('kpi-isr-min').textContent   = bot.isr_moyen.toFixed(2);
+  document.getElementById('kpi-isr-min-ind').textContent = bot.indicateur.length > 28 ? bot.indicateur.slice(0,28)+'…' : bot.indicateur;
+}
+
+// ── Chart: trend line (ISR agrégé + % MEC + % pop) ───────────────────────────
+let chartTrend;
+function buildTrend(){
+  const ctx = document.getElementById('chartTrend');
+  chartTrend = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: D.years,
+      datasets: [
+        { label: '% MEC étrangers', data: D.pct_mec_etr, yAxisID:'yL',
+          borderColor: ETR, backgroundColor: 'rgba(239,68,68,.08)', fill:true, tension:.3, pointRadius:4, borderWidth:2 },
+        { label: '% étrangers dans pop.', data: D.pct_pop_etr, yAxisID:'yL',
+          borderColor: MUTED, backgroundColor:'transparent', tension:.3, pointRadius:3, borderWidth:1.5, borderDash:[4,3] },
+        { label: 'ISR agrégé', data: D.isr_agrege, yAxisID:'yR',
+          borderColor:'#d97706', backgroundColor:'transparent', tension:.3, pointRadius:5, borderWidth:2.5, pointStyle:'rectRot' },
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index', intersect:false},
+      plugins:{legend:{display:false},
+        tooltip:{backgroundColor:'#0f172a',borderColor:'#334155',borderWidth:1,
+          titleColor:'#f8fafc',bodyColor:'#cbd5e1',padding:10,
+          callbacks:{label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(2)}${ctx.datasetIndex<2?'%':''}`}}},
+      scales:{
+        yL:{position:'left', grid:{color:GRID},
+          ticks:{color:'#64748b',callback:v=>v+'%'}},
+        yR:{position:'right', grid:{display:false},
+          ticks:{color:'#d97706'},
+          title:{display:true,text:'ISR',color:'#d97706',font:{size:10}}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+}
+
+// ── Chart: ISR ranking horizontal bar ────────────────────────────────────────
+let chartRanking;
+function buildRanking(){
+  const labels = [...D.ind_labels].reverse();
+  const vals   = [...D.ind_isr].reverse();
+  const colors = vals.map(v => v >= 3 ? '#dc2626' : v >= 2 ? '#f97316' : v >= 1 ? '#3b82f6' : '#22c55e');
+  const ctx = document.getElementById('chartRanking');
+  chartRanking = new Chart(ctx, {
+    type:'bar', data:{labels, datasets:[{
+      label:'ISR moyen', data:vals, backgroundColor:colors, borderRadius:3, barThickness:14
+    }]},
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:true,
+      plugins:{legend:{display:false},
+        tooltip:{backgroundColor:'#0f172a',borderColor:'#334155',borderWidth:1,
+          titleColor:'#f8fafc',bodyColor:'#cbd5e1',padding:10,
+          callbacks:{label: c => ` ISR = ${c.parsed.x.toFixed(2)} (${c.parsed.x.toFixed(2)}× la prop. démo.)`}}},
+      scales:{
+        x:{grid:{color:GRID},min:0,max:6,ticks:{color:'#64748b'},
+          afterDataLimits: scale => { scale.max = 6; }},
+        y:{grid:{display:false},ticks:{color:'#334155',font:{size:10}}}
+      },
+      plugins:{annotation:{annotations:{refLine:{type:'line',xMin:1,xMax:1,
+        borderColor:'#ef4444',borderWidth:1.5,borderDash:[4,3],
+        label:{content:'ISR = 1',display:true,position:'start',color:'#ef4444',font:{size:9}}
+      }}}}
+    }
+  });
+}
+
+// ── Chart: stacked bar volumes ────────────────────────────────────────────────
+let chartStack;
+function buildStack(){
+  const ctx = document.getElementById('chartStack');
+  chartStack = new Chart(ctx, {
+    type:'bar',
+    data:{labels:D.years, datasets:[
+      {label:'MEC français', data:D.total_fr, backgroundColor:'rgba(59,130,246,.75)', borderRadius:2, stack:'s'},
+      {label:'MEC étrangers', data:D.total_etr, backgroundColor:'rgba(239,68,68,.85)', borderRadius:2, stack:'s'}
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',labels:{boxWidth:10,padding:12,color:'#475569'}},
+        tooltip:{backgroundColor:'#0f172a',borderColor:'#334155',borderWidth:1,
+          titleColor:'#f8fafc',bodyColor:'#cbd5e1',padding:10,
+          callbacks:{
+            label: c => ` ${c.dataset.label}: ${c.parsed.y.toLocaleString('fr-FR')}`,
+            afterBody: items => {
+              if(items.length<2) return [];
+              const tot = items.reduce((s,i)=>s+i.parsed.y,0);
+              const etr = items.find(i=>i.dataset.label.includes('étr'))?.parsed.y||0;
+              return [`Total : ${tot.toLocaleString('fr-FR')}`, `Part étrangers : ${(etr/tot*100).toFixed(1)}%`];
+            }
+          }
+        }},
+      scales:{
+        x:{stacked:true,grid:{display:false}},
+        y:{stacked:true,grid:{color:GRID},ticks:{callback:v=>fmtN(v)}}
+      }
+    }
+  });
+}
+
+// ── Chart: age groups ────────────────────────────────────────────────────────
+let chartAge;
+function buildAge(){
+  const ctx = document.getElementById('chartAge');
+  chartAge = new Chart(ctx, {
+    type:'bar',
+    data:{labels:D.age_labels, datasets:[
+      {label:'Français (%)', data:D.age_fr_pct, backgroundColor:'rgba(59,130,246,.7)', borderRadius:3},
+      {label:'Étrangers (%)', data:D.age_etr_pct, backgroundColor:'rgba(239,68,68,.8)', borderRadius:3}
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{legend:{position:'top',labels:{boxWidth:10,color:'#475569'}},
+        tooltip:{backgroundColor:'#0f172a',borderColor:'#334155',borderWidth:1,
+          titleColor:'#f8fafc',bodyColor:'#cbd5e1',padding:10,
+          callbacks:{
+            label: c => ` ${c.dataset.label}: ${c.parsed.y}%`,
+            afterLabel: c => {
+              const abs = c.datasetIndex===0 ? D.age_fr_abs[c.dataIndex] : D.age_etr_abs[c.dataIndex];
+              return ` (${abs.toLocaleString('fr-FR')} personnes)`;
+            }
+          }
+        }},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10}}},
+        y:{grid:{color:GRID},ticks:{callback:v=>v+'%'},max:55}
+      }
+    }
+  });
+}
+
+// ── Chart: sex pie ────────────────────────────────────────────────────────────
+function buildSex(){
+  const ctx = document.getElementById('chartSex');
+  const fr_h = D.sex_fr_h, fr_f = D.sex_fr_f;
+  const et_h = D.sex_etr_h, et_f = D.sex_etr_f;
+  const fr_tot = fr_h+fr_f, et_tot = et_h+et_f;
+  new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:['Français','Étrangers'],
+      datasets:[
+        {label:'Hommes', data:[(fr_h/fr_tot*100).toFixed(1),(et_h/et_tot*100).toFixed(1)],
+          backgroundColor:['rgba(59,130,246,.8)','rgba(239,68,68,.8)'], borderRadius:4},
+        {label:'Femmes', data:[(fr_f/fr_tot*100).toFixed(1),(et_f/et_tot*100).toFixed(1)],
+          backgroundColor:['rgba(147,197,253,.7)','rgba(252,165,165,.7)'], borderRadius:4}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{legend:{position:'top',labels:{boxWidth:10,color:'#475569'}},
+        tooltip:{backgroundColor:'#0f172a',borderColor:'#334155',borderWidth:1,
+          titleColor:'#f8fafc',bodyColor:'#cbd5e1',padding:10,
+          callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}%`}}},
+      scales:{
+        x:{grid:{display:false}},
+        y:{grid:{color:GRID},max:100,ticks:{callback:v=>v+'%'}}
+      }
+    }
+  });
+}
+
+// ── Chart: ISR par indicateur × année ────────────────────────────────────────
+let chartIndYear;
+function buildIndYear(filterInd){
+  if(chartIndYear){ chartIndYear.destroy(); }
+  const yrs = D.years_range;
+  let datasets;
+  if(filterInd==='all'){
+    datasets = D.ind_labels.map((lbl,i) => {
+      const hue = [0,210,30,120,270,180,45,330][i%8];
+      const col = `hsl(${hue},65%,52%)`;
+      return { label:lbl, data:yrs.map(y=>D.isr_by_year[lbl]?.[y]||null),
+        borderColor:col, backgroundColor:'transparent', tension:.3,
+        pointRadius:3, borderWidth:1.5 };
+    });
+  } else {
+    datasets = [{
+      label:filterInd,
+      data:yrs.map(y=>D.isr_by_year[filterInd]?.[y]||null),
+      borderColor: ETR, backgroundColor:'rgba(239,68,68,.08)', fill:true,
+      tension:.3, pointRadius:5, borderWidth:2.5
+    }];
+  }
+  document.getElementById('ind-select-label').textContent =
+    filterInd==='all' ? 'tous indicateurs' : filterInd;
+  const ctx = document.getElementById('chartIndYear');
+  chartIndYear = new Chart(ctx, {
+    type:'line', data:{labels:yrs, datasets},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:filterInd==='all'?{position:'bottom',labels:{boxWidth:8,padding:8,font:{size:9},color:'#475569'}}:{display:false},
+        tooltip:{backgroundColor:'#0f172a',borderColor:'#334155',borderWidth:1,
+          titleColor:'#f8fafc',bodyColor:'#cbd5e1',padding:10,
+          callbacks:{label:c=>` ${c.dataset.label}: ISR ${c.parsed.y?.toFixed(2)||'n/a'}`}}
+      },
+      scales:{
+        x:{grid:{display:false}},
+        y:{grid:{color:GRID},min:0,ticks:{color:'#64748b'}}
+      }
+    }
+  });
+}
+
+// ── Chart: gap bar (% MEC vs % pop per indicator 2024) ───────────────────────
+function buildGap(){
+  const ctx = document.getElementById('chartGap');
+  const labels = D.ind_labels.map(l => l.length>28 ? l.slice(0,28)+'…' : l);
+  // pct_pop is same for all (pop. générale), use last D.pct_pop_etr
+  const popPct = D.pct_pop_etr[D.pct_pop_etr.length-2]; // 2024
+  const popArr = D.ind_labels.map(() => popPct);
+  new Chart(ctx, {
+    type:'bar', indexAxis:'y',
+    data:{
+      labels,
+      datasets:[
+        {label:'% MEC étrangers (moy. 2016-24)', data:D.ind_pct_mec,
+          backgroundColor:'rgba(239,68,68,.75)', borderRadius:2, barThickness:10},
+        {label:'% étrangers dans pop.', data:popArr,
+          backgroundColor:'rgba(148,163,184,.5)', borderRadius:2, barThickness:10}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{
+        legend:{position:'top',labels:{boxWidth:10,color:'#475569',font:{size:10}}},
+        tooltip:{backgroundColor:'#0f172a',borderColor:'#334155',borderWidth:1,
+          titleColor:'#f8fafc',bodyColor:'#cbd5e1',padding:10,
+          callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.x.toFixed(1)}%`}}
+      },
+      scales:{
+        x:{grid:{color:GRID},ticks:{callback:v=>v+'%'}},
+        y:{grid:{display:false},ticks:{font:{size:9},color:'#334155'}}
+      }
+    }
+  });
+}
+
+// ── Detail table ──────────────────────────────────────────────────────────────
+let sortCol = 'isr_moyen', sortDir = -1;
+function buildTable(){
+  const rows = [...D.detail_table].sort((a,b) => (a[sortCol]>b[sortCol]?1:-1)*sortDir);
+  const maxISR = Math.max(...rows.map(r=>r.isr_moyen));
+  const badge = t => `<span class="badge ${t}">${t==='hausse'?'▲ hausse':t==='baisse'?'▼ baisse':'→ stable'}</span>`;
+  const isrBar = v => `<div class="isr-bar-cell"><div class="isr-bar" style="width:${(v/maxISR*120).toFixed(0)}px"></div><b>${v.toFixed(2)}</b></div>`;
+  const arrow = c => c===sortCol ? (sortDir===-1?'▼':'▲') : '';
+
+  document.getElementById('detail-table').innerHTML = `
+    <table>
+      <thead><tr>
+        <th onclick="resort('indicateur')">Indicateur ${arrow('indicateur')}</th>
+        <th onclick="resort('isr_moyen')" style="width:160px">ISR moyen ${arrow('isr_moyen')}</th>
+        <th onclick="resort('pct_mec_etr')">% MEC étr. ${arrow('pct_mec_etr')}</th>
+        <th onclick="resort('pct_pop')">% pop. étr. ${arrow('pct_pop')}</th>
+        <th onclick="resort('nb_total')">Total MEC (dernière année) ${arrow('nb_total')}</th>
+        <th onclick="resort('tendance')">Tendance ISR ${arrow('tendance')}</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(r=>`<tr>
+          <td>${r.indicateur}</td>
+          <td>${isrBar(r.isr_moyen)}</td>
+          <td><b style="color:#ef4444">${r.pct_mec_etr.toFixed(1)}%</b></td>
+          <td>${r.pct_pop.toFixed(1)}%</td>
+          <td>${r.nb_total ? r.nb_total.toLocaleString('fr-FR') : '—'}</td>
+          <td>${badge(r.tendance)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function resort(col){
+  if(sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=-1; }
+  buildTable();
+}
+
+// ── Master update ─────────────────────────────────────────────────────────────
+function updateAll(){
+  const ind = document.getElementById('filt-ind').value;
+  const yr  = document.getElementById('filt-yr').value;
+  updateKPIs(ind, yr);
+  buildIndYear(ind);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+updateKPIs('all','all');
+buildTrend();
+buildRanking();
+buildStack();
+buildAge();
+buildSex();
+buildIndYear('all');
+buildGap();
+buildTable();
+</script>
+</body>
+</html>

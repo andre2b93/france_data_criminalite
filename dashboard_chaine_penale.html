@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chaîne Pénale — Immigration × Criminalité × Justice</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f0f2f5;--card:#fff;--header:#1a1a2e;--text:#1a1a2e;--muted:#6c757d;
+--blue:#4C72B0;--orange:#DD8452;--green:#55A868;--red:#C44E52;--purple:#8172B3;
+--teal:#64B5CD;--gap:16px;--r:10px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;}
+.wrap{max-width:1380px;margin:0 auto;padding:var(--gap);}
+header{background:var(--header);color:#fff;padding:20px 28px;border-radius:var(--r);margin-bottom:var(--gap);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+header h1{font-size:18px;font-weight:700;}
+header .sub{font-size:11px;opacity:.65;margin-top:3px;}
+.filters{display:flex;gap:10px;align-items:center;}
+.filters label{font-size:12px;opacity:.75;}
+.filters select{padding:5px 9px;border:1px solid rgba(255,255,255,.25);border-radius:5px;background:rgba(255,255,255,.15);color:#fff;font-size:13px;cursor:pointer;}
+.filters select option{background:#1a1a2e;}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--gap);margin-bottom:var(--gap);}
+.kpi{background:var(--card);border-radius:var(--r);padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid var(--blue);}
+.kpi.k2{border-color:var(--orange);}.kpi.k3{border-color:var(--green);}.kpi.k4{border-color:var(--red);}.kpi.k5{border-color:var(--purple);}
+.kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.kpi-val{font-size:24px;font-weight:800;}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-bottom:var(--gap);}
+.row3{display:grid;grid-template-columns:2fr 1fr;gap:var(--gap);margin-bottom:var(--gap);}
+.card{background:var(--card);border-radius:var(--r);padding:20px 22px;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+.card h3{font-size:13px;font-weight:700;margin-bottom:3px;}
+.card .desc{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.4;}
+.card canvas{display:block;width:100%!important;}
+.warn{background:#fff8e1;border-left:4px solid #f9a825;border-radius:var(--r);padding:12px 16px;font-size:12px;color:#5a4a00;margin-bottom:var(--gap);}
+.warn strong{font-size:13px;}
+.funnel{display:flex;flex-direction:column;gap:10px;padding:10px 0;}
+.frow{display:grid;grid-template-columns:110px 1fr 20px 1fr 70px;gap:6px;align-items:center;}
+.flbl{font-size:12px;font-weight:600;color:var(--muted);text-align:right;padding-right:8px;}
+.fbar-wrap{background:#f0f2f5;border-radius:4px;height:28px;overflow:hidden;}
+.fbar{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:7px;font-size:11px;font-weight:700;color:#fff;min-width:40px;}
+.fdivider{text-align:center;font-size:10px;color:#ccc;}
+.fpct{font-size:10px;color:var(--muted);text-align:center;margin-top:2px;}
+.fnote{font-size:10px;color:#aaa;}
+.fhdr{display:grid;grid-template-columns:110px 1fr 20px 1fr 70px;gap:6px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.sources{font-size:11px;color:var(--muted);background:var(--card);border-radius:var(--r);padding:14px 18px;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+.sources strong{display:block;margin-bottom:5px;font-size:12px;color:var(--text);}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr);}.row2,.row3{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Chaîne Pénale — Immigration × Criminalité × Justice</h1>
+    <div class="sub">SSMSI (MEC 2016–2024) · CJN/SDSE (condamnations) · DAP (prison) · DGEF (titres de séjour) · INSEE</div>
+  </div>
+  <div class="filters">
+    <label>Année de référence</label>
+    <select id="sel-year" onchange="update()">
+      <option value="2018">2018</option>
+      <option value="2019">2019</option>
+      <option value="2017">2017</option>
+      <option value="2016">2016</option>
+    </select>
+  </div>
+</header>
+
+<div class="warn">
+  <strong>⚠ Avertissement méthodologique</strong> —
+  Ces graphiques croisent des sources de périmètres différents (police, justice, administration pénitentiaire).
+  Les « taux d'aboutissement » sont des approximations macro. La répartition des condamnations par nationalité
+  <em>n'est pas disponible dans l'open data français</em> — les valeurs étrangers/français dans la chaîne pénale
+  sont des estimations. Corrélation ≠ causalité.
+</div>
+
+<div class="kpis">
+  <div class="kpi"><div class="kpi-lbl">Taux MEC ét. /1000</div><div class="kpi-val" id="k1">—</div><div class="kpi-sub" id="k1s">—</div></div>
+  <div class="kpi k2"><div class="kpi-lbl">ISR moyen</div><div class="kpi-val" id="k2">—</div><div class="kpi-sub">17 indicateurs (1=proportionnel)</div></div>
+  <div class="kpi k3"><div class="kpi-lbl">Flux titres de séjour</div><div class="kpi-val" id="k3">—</div><div class="kpi-sub" id="k3s">premiers titres, pays tiers</div></div>
+  <div class="kpi k4"><div class="kpi-lbl">% étrangers en prison</div><div class="kpi-val" id="k4">—</div><div class="kpi-sub" id="k4s">—</div></div>
+  <div class="kpi k5"><div class="kpi-lbl">Condamnations (CJN)</div><div class="kpi-val" id="k5">—</div><div class="kpi-sub" id="k5s">toutes nationalités</div></div>
+</div>
+
+<!-- Chart 1: dual axis -->
+<div class="card" style="margin-bottom:var(--gap)">
+  <h3>① Flux d'immigration vs Taux de criminalité (2016–2024)</h3>
+  <div class="desc">Barres (axe gauche) = flux annuels premiers titres de séjour délivrés (pays tiers, hors Britanniques). Lignes (axe droit) = taux de MEC pour 1 000 habitants. ISR moyen = surreprésentation étrangers/population. Corrélation flux→MEC t+1 : r = +0,85 (hors 2020 covid, p = 0,016).</div>
+  <canvas id="c1" height="300"></canvas>
+</div>
+
+<!-- Charts 2 + 2b -->
+<div class="row3">
+  <div class="card">
+    <h3>② Flux par motif de titre de séjour (2016–2021)</h3>
+    <div class="desc">Composition des premiers titres par motif d'admission. Les données 2022–2023 ne sont pas disponibles dans ce dataset. <strong>La comparaison motif → profil judiciaire est impossible</strong> avec les données françaises ouvertes (MEC binaire FR/ÉTR uniquement).</div>
+    <canvas id="c2" height="260"></canvas>
+  </div>
+  <div class="card">
+    <h3>Profil de risque par motif</h3>
+    <div class="desc">ISR proxy issu de la littérature internationale. <strong>Non vérifiable sur données françaises.</strong> Indicatif uniquement.</div>
+    <canvas id="c2b" height="260"></canvas>
+  </div>
+</div>
+
+<!-- Chart 3: chain -->
+<div class="card" style="margin-bottom:var(--gap)">
+  <h3>③ Chaîne pénale : MEC → Condamnations → Prison (année sélectionnée)</h3>
+  <div class="desc">Effectifs à chaque étape pour Français (bleu) et Étrangers (orange). Condamnations par nationalité = <strong>estimation</strong> (% MEC × taux aboutissement global — données CJN sans ventilation nationalité en open data). Prison = stock au 1er janvier N+1, non comparable au flux annuel.</div>
+  <canvas id="c3" height="280"></canvas>
+</div>
+
+<!-- Funnel -->
+<div class="card" style="margin-bottom:var(--gap)">
+  <h3>③b Progression dans la chaîne pénale — base 100 MEC de chaque groupe</h3>
+  <div class="desc">Chaque barre = % restant à chaque étape par rapport aux MEC initiaux (Français = bleu, Étrangers = orange). ★ = estimation.</div>
+  <div class="fhdr"><div></div><div style="text-align:center;color:var(--blue)">Français</div><div></div><div style="text-align:center;color:var(--orange)">Étrangers</div><div></div></div>
+  <div class="funnel" id="funnel"></div>
+</div>
+
+<!-- Chart 4: ISR evolution -->
+<div class="card" style="margin-bottom:var(--gap)">
+  <h3>④ Évolution de l'ISR par indicateur (2016–2024) — cliquer légende pour filtrer</h3>
+  <div class="desc">La ligne pointillée grise marque ISR = 1 (proportionnel). Les infractions patrimoniales mobiles (cambriolages, vols véhicules) maintiennent ISR ≥ 3. Les violences interpersonnelles sont en baisse significative (Mann-Kendall p &lt; 0,001).</div>
+  <canvas id="c4" height="300"></canvas>
+</div>
+
+<div class="sources">
+  <strong>Sources</strong>
+  MEC : SSMSI – base sur les caractéristiques des mis en cause 2016–2025 (infractions élucidées, nationalité binaire FR/ÉTR).
+  Condamnations : Ministère de la Justice/SDSE – CJN 2016–2020 (Tab1, toutes juridictions, hors compositions pénales).
+  Population carcérale : DAP – Statistiques trimestrielles milieu fermé, T9_10 situation au 1er janvier (2016–2018 données réelles extraites).
+  Titres de séjour : DGEF/DSED – Admission au séjour par motif, publication juin 2024.
+  Population étrangère : INSEE Figure 2, part étrangers dans la population totale.
+</div>
+
+</div><!-- .wrap -->
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────
+const YRS9  = [2016,2017,2018,2019,2020,2021,2022,2023,2024];
+const YRS8  = [2016,2017,2018,2019,2020,2021,2022,2023];
+
+const FLUX  = [237210,254628,267421,287503,229388,282772,318926,326954];
+const T_ET  = [25.6,27.2,29.0,28.8,27.2,31.0,33.4,31.6,30.0];
+const T_FR  = [11.6,11.9,12.2,12.1,11.3,12.7,13.1,13.9,14.4];
+const ISR_M = [2.26,2.46,2.43,2.42,2.55,2.67,2.76,2.49,2.30];
+const PCT_POP=[6.8,7.0,7.2,7.4,7.6,7.7,7.8,8.2,8.8];
+
+const MOTIF_LABELS=['Économique','Familial','Étudiants','Humanitaire','Divers'];
+const MOTIF_DATA=[
+  [22690,27217,33336,39043,26705,36685],
+  [94341,94243,97663,98206,80660,93172],
+  [73864,80566,83974,90671,73394,88617],
+  [30369,37102,35710,38861,33801,41966],
+  [15946,15500,16738,20722,14828,22332],
+];
+const MOTIF_YRS=[2016,2017,2018,2019,2020,2021];
+
+const RISK_LABELS=['Économique\n(travailleurs)','Familial\n(regroupement)','Étudiants','Humanitaire\n(asile)','Divers'];
+const RISK_VALS=[1.1,1.6,0.8,1.9,1.4];
+const RISK_COLORS=['#55A868CC','#DD8452CC','#4C72B0CC','#C44E52CC','#8172B3CC'];
+
+const CHAIN={
+  2016:{mec_et:116108,mec_fr:723250,cond_tot:557075,prison_et:14875,prison_fr:61654},
+  2017:{mec_et:127342,mec_fr:742177,cond_tot:555203,prison_et:15933,prison_fr:62767},
+  2018:{mec_et:140236,mec_fr:759447,cond_tot:548411,prison_et:16374,prison_fr:63335},
+  2019:{mec_et:143819,mec_fr:752194,cond_tot:562668,prison_et:16909,prison_fr:64896},
+};
+const FLUX_TOTAL={2016:237210,2017:254628,2018:267421,2019:287503,2020:229388,2021:282772,2022:318926,2023:326954};
+const ISR_COND={2016:557075,2017:555203,2018:548411,2019:562668};
+
+const ISR_LABELS=['Cambriolages','Vols dans véhicules','Vols violents','Vols sans violence','Trafic stupéfiants','Viols','Viol. intra-fam.','Viol. sexuelles','Usage stupéfiants'];
+const ISR_DATA=[
+  [3.83,4.29,4.70,4.29,4.75,5.19,5.31,4.64,4.26],
+  [2.63,3.11,3.43,2.98,4.28,4.62,4.85,4.56,4.44],
+  [3.12,3.72,4.13,3.78,4.72,4.91,4.70,4.05,3.35],
+  [3.31,3.44,3.61,3.52,3.78,3.70,3.70,3.51,3.33],
+  [1.81,1.93,1.97,2.07,1.98,2.25,2.45,2.41,2.46],
+  [2.09,2.18,2.12,2.00,1.90,1.77,1.67,1.59,1.56],
+  [2.41,2.29,2.27,2.26,2.15,2.02,1.92,1.89,1.85],
+  [1.94,2.01,1.96,1.87,1.73,1.59,1.49,1.46,1.45],
+  [1.27,1.29,1.31,1.34,1.42,1.40,1.42,1.39,1.43],
+];
+const COLORS=['#4C72B0','#DD8452','#55A868','#C44E52','#8172B3','#64B5CD','#937860','#e09b53','#5f8a5e'];
+
+// ─── HELPERS ──────────────────────────────────────────────
+function getYr(){ return parseInt(document.getElementById('sel-year').value); }
+function fmtK(v){ if(v==null||isNaN(v)) return '—'; return v>=1e6?`${(v/1e6).toFixed(2)}M`:v>=1000?`${(v/1000).toFixed(0)}k`:v.toString(); }
+function fmtN(v){ if(v==null||isNaN(v)) return '—'; return v.toLocaleString('fr-FR'); }
+function fmtP(v,d=1){ if(v==null||isNaN(v)) return '—'; return v.toFixed(d)+'%'; }
+
+let charts={};
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+
+// ─── CHART 1: DUAL AXIS ───────────────────────────────────
+function buildC1(){
+  destroyChart('c1');
+  charts.c1 = new Chart(document.getElementById('c1'),{
+    type:'bar',
+    data:{
+      labels: YRS8,
+      datasets:[
+        {type:'bar',  label:'Flux titres de séjour (axe g.)',     data:FLUX,
+         backgroundColor:'rgba(76,114,176,0.22)',borderColor:'#4C72B0',borderWidth:1.5,
+         borderRadius:4,yAxisID:'yL'},
+        {type:'line', label:'Taux MEC étrangers /1 000 (axe d.)', data:T_ET.slice(0,8),
+         borderColor:'#DD8452',backgroundColor:'transparent',borderWidth:2.5,
+         tension:0.3,pointRadius:5,pointBackgroundColor:'#DD8452',yAxisID:'yR'},
+        {type:'line', label:'Taux MEC français /1 000 (axe d.)',  data:T_FR.slice(0,8),
+         borderColor:'#55A868',backgroundColor:'transparent',borderWidth:2,
+         borderDash:[5,4],tension:0.3,pointRadius:4,pointBackgroundColor:'#55A868',yAxisID:'yR'},
+        {type:'line', label:'ISR moyen (axe d.)',                 data:ISR_M.slice(0,8),
+         borderColor:'#8172B3',backgroundColor:'transparent',borderWidth:2,
+         borderDash:[8,3],tension:0.3,pointRadius:3,pointBackgroundColor:'#8172B3',yAxisID:'yR'},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{usePointStyle:true,padding:14,font:{size:12}}},
+        tooltip:{callbacks:{label(ctx){
+          const v=ctx.parsed.y;
+          if(ctx.datasetIndex===0) return `Flux: ${fmtN(v)} titres`;
+          if(ctx.datasetIndex===3) return `ISR moyen: ${v.toFixed(2)}`;
+          return `${ctx.dataset.label.split('(')[0].trim()}: ${v.toFixed(1)}/1 000`;
+        }}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:12}}},
+        yL:{position:'left',
+          title:{display:true,text:'Flux premiers titres (pays tiers)',font:{size:11}},
+          ticks:{callback:v=>v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1000?`${(v/1000).toFixed(0)}k`:v,font:{size:11}},
+          grid:{color:'rgba(0,0,0,0.05)'}},
+        yR:{position:'right',min:0,max:40,
+          title:{display:true,text:'Taux /1 000  |  ISR moyen',font:{size:11}},
+          ticks:{font:{size:11}},grid:{display:false}},
+      }
+    }
+  });
+}
+
+// ─── CHART 2: STACKED MOTIFS ──────────────────────────────
+function buildC2(){
+  destroyChart('c2');
+  charts.c2 = new Chart(document.getElementById('c2'),{
+    type:'bar',
+    data:{
+      labels: MOTIF_YRS,
+      datasets: MOTIF_LABELS.map((lbl,i)=>({
+        label:lbl, data:MOTIF_DATA[i],
+        backgroundColor:COLORS[i]+'BB',borderColor:COLORS[i],borderWidth:1,
+        stack:'s',borderRadius:2
+      }))
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{usePointStyle:true,padding:8,font:{size:11}}},
+        tooltip:{callbacks:{label(ctx){return `${ctx.dataset.label}: ${fmtK(ctx.parsed.y)}`;} } }
+      },
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:12}}},
+        y:{stacked:true,ticks:{callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v,font:{size:11}},
+          grid:{color:'rgba(0,0,0,0.05)'}}
+      }
+    }
+  });
+}
+
+// ─── CHART 2b: RISK PROXY ─────────────────────────────────
+function buildC2b(){
+  destroyChart('c2b');
+  charts.c2b = new Chart(document.getElementById('c2b'),{
+    type:'bar',
+    data:{
+      labels:['Éco./Travail','Familial','Étudiants','Humanit.','Divers'],
+      datasets:[{
+        label:'ISR proxy (littérature internationale)',
+        data:RISK_VALS,
+        backgroundColor:RISK_COLORS,
+        borderColor:RISK_COLORS.map(c=>c.slice(0,-2)+'FF'),
+        borderWidth:1.5,borderRadius:5,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label(ctx){
+          const notes=['Emploi stable → faibles taux','Dépend intégration','Taux les plus bas','Précarité élevée','Hétérogène'];
+          return [`ISR estimé: ${ctx.parsed.x.toFixed(1)}`,notes[ctx.dataIndex]];
+        }}}
+      },
+      scales:{
+        x:{min:0,max:2.5,
+          title:{display:true,text:'ISR proxy — ESTIMATION LITTÉRATURE UNIQUEMENT',font:{size:10},color:'#aaa'},
+          ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.06)'}},
+        y:{grid:{display:false},ticks:{font:{size:11}}}
+      }
+    }
+  });
+}
+
+// ─── CHART 3: CHAIN ───────────────────────────────────────
+function buildC3(yr){
+  destroyChart('c3');
+  const d=CHAIN[yr]; if(!d) return;
+  const pctET = d.mec_et/(d.mec_et+d.mec_fr);
+  const cond_et=Math.round(d.cond_tot*pctET);
+  const cond_fr=d.cond_tot-cond_et;
+  charts.c3 = new Chart(document.getElementById('c3'),{
+    type:'bar',
+    data:{
+      labels:['Mis en cause\n(SSMSI réel)','Condamnations\n(★ estimées par nat.)','Population carcérale\n(DAP stock jan. N+1)'],
+      datasets:[
+        {label:'Français',data:[d.mec_fr,cond_fr,d.prison_fr],
+         backgroundColor:'rgba(76,114,176,0.7)',borderColor:'#4C72B0',borderWidth:1.5,borderRadius:4},
+        {label:'Étrangers',data:[d.mec_et,cond_et,d.prison_et],
+         backgroundColor:'rgba(221,132,82,0.7)',borderColor:'#DD8452',borderWidth:1.5,borderRadius:4},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{usePointStyle:true,padding:14,font:{size:12}}},
+        tooltip:{callbacks:{label(ctx){
+          const v=ctx.parsed.y;
+          const tot=ctx.dataIndex===0?(d.mec_et+d.mec_fr):ctx.dataIndex===1?d.cond_tot:(d.prison_et+d.prison_fr);
+          return `${ctx.dataset.label}: ${fmtN(v)} (${(v/tot*100).toFixed(1)}%)`;
+        }}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:12}}},
+        y:{ticks:{callback:v=>v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1000?`${(v/1000).toFixed(0)}k`:v,font:{size:11}},
+          grid:{color:'rgba(0,0,0,0.05)'}}
+      }
+    }
+  });
+}
+
+// ─── FUNNEL ───────────────────────────────────────────────
+function buildFunnel(yr){
+  const d=CHAIN[yr]; if(!d) return;
+  const pctET=d.mec_et/(d.mec_et+d.mec_fr);
+  const cond_et=Math.round(d.cond_tot*pctET);
+  const cond_fr=d.cond_tot-cond_et;
+  const steps=[
+    {label:'MEC',frV:d.mec_fr,etV:d.mec_et,note:'données réelles SSMSI'},
+    {label:'Condamn. ★',frV:cond_fr,etV:cond_et,note:'★ estimation'},
+    {label:'Prison (stock)',frV:d.prison_fr,etV:d.prison_et,note:'stock – non comparable'},
+  ];
+  const maxFR=steps[0].frV, maxET=steps[0].etV;
+  let html='';
+  steps.forEach((s,i)=>{
+    const wFR=(s.frV/maxFR*100).toFixed(0);
+    const wET=(s.etV/maxET*100).toFixed(0);
+    const pFR=i===0?'100 %':`${(s.frV/steps[0].frV*100).toFixed(1)} %`;
+    const pET=i===0?'100 %':`${(s.etV/steps[0].etV*100).toFixed(1)} %`;
+    html+=`<div class="frow">
+      <div class="flbl">${s.label}</div>
+      <div>
+        <div class="fbar-wrap"><div class="fbar" style="width:${wFR}%;background:#4C72B0">${fmtN(s.frV)}</div></div>
+        <div class="fpct">${pFR} des MEC FR</div>
+      </div>
+      <div class="fdivider">|</div>
+      <div>
+        <div class="fbar-wrap"><div class="fbar" style="width:${wET}%;background:#DD8452">${fmtN(s.etV)}</div></div>
+        <div class="fpct">${pET} des MEC ÉT</div>
+      </div>
+      <div class="fnote">${s.note}</div>
+    </div>`;
+  });
+  document.getElementById('funnel').innerHTML=html;
+}
+
+// ─── CHART 4: ISR ─────────────────────────────────────────
+function buildC4(){
+  destroyChart('c4');
+  charts.c4 = new Chart(document.getElementById('c4'),{
+    type:'line',
+    data:{
+      labels:YRS9,
+      datasets:ISR_LABELS.map((lbl,i)=>({
+        label:lbl, data:ISR_DATA[i],
+        borderColor:COLORS[i], backgroundColor:'transparent',
+        borderWidth:2, tension:0.3, pointRadius:3, pointHoverRadius:6,
+        hidden:i>4,
+      }))
+    },
+    plugins:[{
+      id:'refLine',
+      afterDraw(chart){
+        const {ctx,scales:{y,x}}=chart;
+        const yPos=y.getPixelForValue(1);
+        ctx.save();
+        ctx.strokeStyle='rgba(120,120,120,0.4)';
+        ctx.lineWidth=1.5;
+        ctx.setLineDash([5,5]);
+        ctx.beginPath();
+        ctx.moveTo(x.left,yPos);
+        ctx.lineTo(x.right,yPos);
+        ctx.stroke();
+        ctx.fillStyle='#aaa';
+        ctx.font='10px sans-serif';
+        ctx.fillText('ISR = 1 (proportionnel)',x.left+6,yPos-4);
+        ctx.restore();
+      }
+    }],
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'right',labels:{usePointStyle:true,padding:8,font:{size:11}}},
+        tooltip:{callbacks:{label(ctx){return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`;}}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:12}}},
+        y:{min:0,max:6.5,
+          title:{display:true,text:'ISR  (1 = proportionnel à la population)',font:{size:11}},
+          ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}
+        }
+      }
+    }
+  });
+}
+
+// ─── KPIs ─────────────────────────────────────────────────
+function renderKPIs(yr){
+  const i=YRS9.indexOf(yr);
+  const d=CHAIN[yr]||{};
+  document.getElementById('k1').textContent = i>=0 ? T_ET[i].toFixed(1) : '—';
+  document.getElementById('k1s').textContent = `vs ${i>=0?T_FR[i].toFixed(1):'—'}/1000 Français`;
+  document.getElementById('k2').textContent = i>=0 ? ISR_M[i].toFixed(2) : '—';
+  document.getElementById('k3').textContent = FLUX_TOTAL[yr] ? fmtK(FLUX_TOTAL[yr]) : '—';
+  document.getElementById('k3s').textContent = yr+' · premiers titres pays tiers';
+  if(d.prison_et && d.prison_et+d.prison_fr>0){
+    const pct=(d.prison_et/(d.prison_et+d.prison_fr)*100).toFixed(1);
+    document.getElementById('k4').textContent = pct+'%';
+    document.getElementById('k4s').textContent = `vs ${fmtP(PCT_POP[i])} dans la population`;
+  } else {
+    document.getElementById('k4').textContent='~20%';
+    document.getElementById('k4s').textContent='estimation DAP';
+  }
+  document.getElementById('k5').textContent = d.cond_tot ? fmtK(d.cond_tot) : '—';
+  document.getElementById('k5s').textContent = yr+' · toutes nationalités';
+}
+
+const PCT_POP=[6.8,7.0,7.2,7.4,7.6,7.7,7.8,8.2,8.8];
+
+function update(){
+  const yr=getYear();
+  renderKPIs(yr);
+  buildC3(yr);
+  buildFunnel(yr);
+}
+
+// init
+buildC1();
+buildC2();
+buildC2b();
+buildC4();
+update();
+</script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criminalité en France — Tableau de bord</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f1117; color: #e0e0e0; }
+  .header { background: linear-gradient(135deg, #1a1f35 0%, #0d1b2a 100%);
+            border-bottom: 2px solid #2a3a5e; padding: 28px 40px; }
+  .header h1 { font-size: 1.8rem; font-weight: 700; color: #fff; }
+  .header p { color: #8899aa; margin-top: 6px; font-size: 0.92rem; }
+  .header .sources { margin-top: 10px; font-size: 0.8rem; color: #556688; }
+  .header .sources a { color: #4488cc; text-decoration: none; }
+
+  .kpi-row { display: flex; gap: 16px; padding: 24px 40px 0; flex-wrap: wrap; }
+  .kpi { background: #1a1f2e; border: 1px solid #2a3550; border-radius: 10px;
+         padding: 18px 24px; flex: 1; min-width: 180px; }
+  .kpi .value { font-size: 2rem; font-weight: 700; color: #4da6ff; }
+  .kpi .label { font-size: 0.8rem; color: #8899aa; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi .delta { font-size: 0.82rem; margin-top: 6px; }
+  .kpi .delta.down { color: #4dcc88; } .kpi .delta.up { color: #ff6b6b; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px 40px; }
+  .grid.wide { grid-template-columns: 1fr; }
+  .grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .card { background: #1a1f2e; border: 1px solid #2a3550; border-radius: 10px; padding: 20px; }
+  .card h3 { font-size: 0.95rem; color: #aabbcc; margin-bottom: 16px; font-weight: 600;
+             text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #2a3550; padding-bottom: 10px; }
+  .card canvas { max-height: 300px; }
+  .card.tall canvas { max-height: 420px; }
+  .note { font-size: 0.75rem; color: #556688; margin-top: 10px; }
+  .section-title { padding: 24px 40px 0; font-size: 1.1rem; color: #aabbcc;
+                   font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+                   border-top: 1px solid #2a3550; margin-top: 8px; }
+  footer { padding: 24px 40px; color: #445566; font-size: 0.78rem; border-top: 1px solid #1a2a3a; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🇫🇷 Criminalité en France — Tableau de bord analytique</h1>
+  <p>Données issues des publications officielles de l'administration française</p>
+  <div class="sources">
+    Sources : <a href="https://www.data.gouv.fr/fr/datasets/bases-statistiques-communale-departementale-et-regionale-de-la-delinquance-enregistree-par-la-police-et-la-gendarmerie-nationales/" target="_blank">SSMSI / Police & Gendarmerie</a> ·
+    <a href="https://www.data.gouv.fr/fr/datasets/les-condamnations-statistiques-a-partir-du-casier-judiciaire-national/" target="_blank">Casier judiciaire national</a> ·
+    <a href="https://www.data.gouv.fr/fr/datasets/statistique-mensuelle-de-la-population-ecrouee-et-detenue-en-france/" target="_blank">Population pénitentiaire</a> · data.gouv.fr
+  </div>
+</div>
+
+<div class="kpi-row" id="kpis"></div>
+
+<div class="section-title">Tendances nationales</div>
+<div class="grid">
+  <div class="card tall">
+    <h3>Total crimes &amp; délits enregistrés — Police + Gendarmerie (2000–2021)</h3>
+    <canvas id="chartNational"></canvas>
+    <p class="note">Tous corps confondus (PN + GN). Source : tableaux 4001-ts, SSMSI.</p>
+  </div>
+  <div class="card tall">
+    <h3>Évolution par catégorie de crime (2000–2021)</h3>
+    <canvas id="chartCategories"></canvas>
+    <p class="note">Sélection des catégories les plus volumineuses.</p>
+  </div>
+</div>
+
+<div class="section-title">Crimes &amp; délits enregistrés par département (2025)</div>
+<div class="grid">
+  <div class="card tall">
+    <h3>Top 20 — taux pour 1 000 habitants</h3>
+    <canvas id="chartDeptTop"></canvas>
+  </div>
+  <div class="card">
+    <h3>Répartition par type d'infraction (2025)</h3>
+    <canvas id="chartCrimeTypes"></canvas>
+    <p class="note">Données départementales agrégées au niveau national.</p>
+  </div>
+</div>
+
+<div class="section-title">Justice &amp; Condamnations</div>
+<div class="grid">
+  <div class="card">
+    <h3>Total condamnations par le casier judiciaire (2012–2020)</h3>
+    <canvas id="chartCond"></canvas>
+    <p class="note">Note : baisse 2020 en partie due au COVID (fermeture tribunaux).</p>
+  </div>
+  <div class="card">
+    <h3>Condamnations — crimes graves (2012–2020)</h3>
+    <canvas id="chartCondDetail"></canvas>
+    <p class="note">Homicides volontaires, viols, vols &amp; recels. Source : casier judiciaire.</p>
+  </div>
+</div>
+
+<div class="section-title">Population carcérale</div>
+<div class="grid">
+  <div class="card">
+    <h3>Population écrouée &amp; détenue en France (2010–2019)</h3>
+    <canvas id="chartPrison"></canvas>
+    <p class="note">Moyenne annuelle, données mensuelles. Source : DAP / Ministère de la Justice.</p>
+  </div>
+  <div class="card">
+    <h3>Comparaison : crimes enregistrés vs. condamnations vs. population carcérale</h3>
+    <canvas id="chartCombo"></canvas>
+    <p class="note">Indices base 100 = 2012 (années communes aux 3 sources).</p>
+  </div>
+</div>
+
+<footer>
+  Analyse réalisée sur données publiques · data.gouv.fr · SSMSI · Ministère de la Justice (DAP, SDSE) ·
+  Champ : France métropolitaine + DOM. Période : 2000–2025 selon disponibilité des sources.
+</footer>
+
+<script>
+const D = {"nat_years": [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021], "nat_totals": [3849130, 4163414, 4218198, 4078192, 3935318, 3892514, 3866059, 3733669, 3698759, 3670168, 3611238, 3600665, 3570910, 3609721, 3651810, 3684646, 3687432, 3715877, 3721798, 3838759, 3389427, 3666850], "cat_trends": {"Vols (roulotte + particuliers)": {"2000": 980312, "2001": 1031771, "2002": 1018510, "2003": 1010568, "2004": 976411, "2005": 954109, "2006": 929401, "2007": 865079, "2008": 813066, "2009": 814345, "2010": 804497, "2011": 803895, "2012": 796172, "2013": 828380, "2014": 866160, "2015": 858268, "2016": 855922, "2017": 860174, "2018": 837583, "2019": 842546, "2020": 669046, "2021": 690887}, "Violences physiques": {"2000": 110422, "2001": 121154, "2002": 129910, "2003": 141700, "2004": 144832, "2005": 157092, "2006": 173666, "2007": 186727, "2008": 199111, "2009": 206160, "2010": 206310, "2011": 206350, "2012": 207411, "2013": 207530, "2014": 211638, "2015": 227151, "2016": 231259, "2017": 239318, "2018": 257140, "2019": 278702, "2020": 282119, "2021": 315694}, "Cambriolages": {"2000": 170948, "2001": 192997, "2002": 203106, "2003": 201170, "2004": 189902, "2005": 173873, "2006": 170871, "2007": 159041, "2008": 160299, "2009": 173108, "2010": 182772, "2011": 212403, "2012": 230045, "2013": 240673, "2014": 224290, "2015": 224143, "2016": 233960, "2017": 238050, "2018": 221747, "2019": 222130, "2020": 175054, "2021": 176937}, "Vols automobiles": {"2000": 308801, "2001": 321158, "2002": 290960, "2003": 237151, "2004": 203421, "2005": 179952, "2006": 162775, "2007": 147682, "2008": 135123, "2009": 131164, "2010": 124678, "2011": 119602, "2012": 114605, "2013": 115379, "2014": 111601, "2015": 114506, "2016": 111690, "2017": 105772, "2018": 98621, "2019": 94273, "2020": 83242, "2021": 82116}, "Usage stupéfiants": {"2000": 78076, "2001": 71283, "2002": 82699, "2003": 93789, "2004": 106672, "2005": 109179, "2006": 118809, "2007": 124223, "2008": 143045, "2009": 144948, "2010": 147054, "2011": 159424, "2012": 165789, "2013": 175027, "2014": 181009, "2015": 183316, "2016": 180011, "2017": 182071, "2018": 179437, "2019": 170644, "2020": 152448, "2021": 210579}, "Escroqueries": {"2000": 142124, "2001": 156014, "2002": 142327, "2003": 145784, "2004": 140550, "2005": 143523, "2006": 166149, "2007": 180946, "2008": 218695, "2009": 220930, "2010": 208898, "2011": 205213, "2012": 166098, "2013": 184540, "2014": 187326, "2015": 201540, "2016": 213230, "2017": 222472, "2018": 229599, "2019": 260368, "2020": 278181, "2021": 316974}, "Violences sexuelles": {"2000": 8778, "2001": 9978, "2002": 10826, "2003": 10955, "2004": 10999, "2005": 10681, "2006": 10416, "2007": 10785, "2008": 10909, "2009": 10541, "2010": 10880, "2011": 11146, "2012": 11628, "2013": 12009, "2014": 12828, "2015": 13881, "2016": 15848, "2017": 17640, "2018": 20465, "2019": 24335, "2020": 26822, "2021": 35192}}, "dept_top_labels": ["Paris", "Bouches-du-Rhône", "Rhône", "Seine-Saint-Denis", "Hérault", "Pyrénées-Orientales", "Guadeloupe", "Alpes-Maritimes", "Val-d'Oise", "Val-de-Marne", "Isère", "Nord", "Vaucluse", "Haute-Garonne", "Gironde", "Var", "Marne", "Hauts-de-Seine", "Aude", "Loire"], "dept_top_rates": [123.08, 82.48, 79.84, 77.31, 67.81, 65.16, 63.17, 62.67, 60.32, 59.78, 59.49, 59.47, 58.85, 57.95, 56.79, 56.67, 54.65, 53.38, 53.22, 53.14], "dept_bot_labels": ["Corse-du-Sud", "Vendée", "Haute-Corse", "Manche", "Haute-Loire", "Aveyron", "Gers", "Creuse", "Lozère", "Cantal"], "dept_bot_rates": [34.16, 33.31, 33.06, 33.06, 32.6, 32.16, 32.14, 31.73, 31.29, 25.85], "crime_type_labels": ["Vols sans violence contre des personnes", "Destructions et dégradations volontaires", "Escroqueries et fraudes aux moyens de paiement", "Usage de stupéfiants", "Violences physiques intrafamiliales", "Vols dans les véhicules", "Violences physiques hors cadre familial", "Usage de stupéfiants (AFD)", "Cambriolages de logement", "Violences sexuelles", "Vols de véhicule", "Vols d'accessoires sur véhicules"], "crime_type_values": [622768, 538587, 445851, 307287, 256863, 233503, 216093, 215510, 212036, 132349, 125209, 95318], "cond_years": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020], "cond_total": [610502, 599089, 578482, 574475, 557075, 555203, 548411, 562668, 469571], "cond_viols": [1271, 1198, 1066, 1024, 1026, 1055, 978, 1064, 732], "cond_homicides": [435, 392, 400, 420, 445, 479, 449, 471, 403], "cond_vols": [97081, 99328, 95119, 91465, 90396, 88160, 81520, 81262, 64395], "prison_years": [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019], "prison_pop": [64034.0, 64501.0, 66952.0, 69020.0, 79426.0, 79189.0, 79139.0, 80350.0, 81895.0, 82103.0], "latest_year": 2025};
+
+// ── Palette ──────────────────────────────────────────────────────────────────
+const C = {
+  blue:    '#4da6ff', teal:    '#00ccbb', orange:  '#ff9944',
+  red:     '#ff5566', purple:  '#bb77ff', green:   '#44cc88',
+  yellow:  '#ffdd44', pink:    '#ff77aa', gray:    '#8899aa',
+  bg:      '#1a1f2e', gridLine:'#2a3550'
+};
+const palette = [C.blue, C.teal, C.orange, C.red, C.purple, C.green, C.yellow, C.pink];
+
+Chart.defaults.color = '#8899aa';
+Chart.defaults.borderColor = C.gridLine;
+Chart.defaults.font.family = "'Segoe UI', Arial, sans-serif";
+
+const baseOpts = (title='') => ({
+  responsive: true, maintainAspectRatio: true,
+  plugins: {
+    legend: { labels: { color: '#aabbcc', boxWidth: 12, padding: 14 } },
+    tooltip: { backgroundColor: '#0f1117', borderColor: C.gridLine, borderWidth: 1,
+                titleColor: '#fff', bodyColor: '#ccc', padding: 10 }
+  },
+  scales: {
+    x: { grid: { color: C.gridLine }, ticks: { color: '#8899aa', maxRotation: 45 } },
+    y: { grid: { color: C.gridLine }, ticks: { color: '#8899aa' } }
+  }
+});
+
+// ── KPIs ─────────────────────────────────────────────────────────────────────
+const natLast  = D.nat_totals[D.nat_totals.length - 1];
+const natFirst = D.nat_totals[0];
+const natPct   = ((natLast - natFirst)/natFirst*100).toFixed(1);
+const prisonLast = D.prison_pop[D.prison_pop.length - 1];
+const condLast   = D.cond_total[D.cond_total.length - 1];
+
+document.getElementById('kpis').innerHTML = `
+  <div class="kpi"><div class="value">${(natLast/1e6).toFixed(2)}M</div>
+    <div class="label">Crimes &amp; délits enregistrés (2021)</div>
+    <div class="delta ${parseFloat(natPct)<0?'down':'up'}">${natPct>0?'+':''}${natPct}% vs 2000</div></div>
+  <div class="kpi"><div class="value">${(condLast/1000).toFixed(0)}k</div>
+    <div class="label">Condamnations (2020)</div>
+    <div class="delta down">−${((610502-condLast)/610502*100).toFixed(1)}% vs 2012</div></div>
+  <div class="kpi"><div class="value">${(prisonLast/1000).toFixed(1)}k</div>
+    <div class="label">Population écrouée (2019)</div>
+    <div class="delta up">+${((prisonLast-D.prison_pop[0])/D.prison_pop[0]*100).toFixed(1)}% vs 2010</div></div>
+  <div class="kpi"><div class="value">123</div>
+    <div class="label">Paris — taux pour 1 000 (2025)</div>
+    <div class="delta up">Dépt. le plus élevé</div></div>
+`;
+
+// ── 1. National trend ─────────────────────────────────────────────────────────
+new Chart(document.getElementById('chartNational'), {
+  type: 'line',
+  data: {
+    labels: D.nat_years,
+    datasets: [{
+      label: 'Total crimes & délits', data: D.nat_totals,
+      borderColor: C.blue, backgroundColor: 'rgba(77,166,255,0.08)',
+      fill: true, tension: 0.3, pointRadius: 3, pointHoverRadius: 6
+    }]
+  },
+  options: { ...baseOpts(), plugins: { ...baseOpts().plugins,
+    annotation: {} },
+    scales: { ...baseOpts().scales,
+      y: { ...baseOpts().scales.y,
+        ticks: { color: '#8899aa', callback: v => (v/1e6).toFixed(1)+'M' }
+      }
+    }
+  }
+});
+
+// ── 2. Categories trend ───────────────────────────────────────────────────────
+{
+  const catNames = Object.keys(D.cat_trends);
+  const years = D.nat_years;
+  const datasets = catNames.map((name, i) => ({
+    label: name,
+    data: years.map(y => D.cat_trends[name][y] || null),
+    borderColor: palette[i], backgroundColor: 'transparent',
+    tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2
+  }));
+  new Chart(document.getElementById('chartCategories'), {
+    type: 'line',
+    data: { labels: years, datasets },
+    options: { ...baseOpts(),
+      scales: { ...baseOpts().scales,
+        y: { ...baseOpts().scales.y,
+          ticks: { color: '#8899aa', callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : (v/1000).toFixed(0)+'k' }
+        }
+      }
+    }
+  });
+}
+
+// ── 3. Dept top 20 ────────────────────────────────────────────────────────────
+new Chart(document.getElementById('chartDeptTop'), {
+  type: 'bar',
+  data: {
+    labels: D.dept_top_labels,
+    datasets: [{
+      label: 'Faits pour 1 000 hab.',
+      data: D.dept_top_rates,
+      backgroundColor: D.dept_top_rates.map((v,i) => i===0 ? C.red : i<3 ? C.orange : C.blue),
+      borderRadius: 4
+    }]
+  },
+  options: { ...baseOpts(), indexAxis: 'y',
+    plugins: { ...baseOpts().plugins, legend: { display: false } },
+    scales: {
+      x: { grid: { color: C.gridLine }, ticks: { color: '#8899aa' } },
+      y: { grid: { color: 'transparent' }, ticks: { color: '#ccc', font: { size: 11 } } }
+    }
+  }
+});
+
+// ── 4. Crime types donut ───────────────────────────────────────────────────────
+new Chart(document.getElementById('chartCrimeTypes'), {
+  type: 'doughnut',
+  data: {
+    labels: D.crime_type_labels.map(l => l.length > 38 ? l.slice(0,38)+'…' : l),
+    datasets: [{
+      data: D.crime_type_values,
+      backgroundColor: palette,
+      borderColor: C.bg, borderWidth: 2
+    }]
+  },
+  options: { responsive: true, maintainAspectRatio: true,
+    plugins: {
+      legend: { position: 'right', labels: { color: '#aabbcc', boxWidth: 10, padding: 8, font: { size: 10 } } },
+      tooltip: { backgroundColor: '#0f1117', borderColor: C.gridLine, borderWidth: 1,
+                  titleColor: '#fff', bodyColor: '#ccc',
+                  callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString('fr-FR')}` } }
+    }
+  }
+});
+
+// ── 5. Condamnations total ─────────────────────────────────────────────────────
+new Chart(document.getElementById('chartCond'), {
+  type: 'bar',
+  data: {
+    labels: D.cond_years,
+    datasets: [{
+      label: 'Total condamnations',
+      data: D.cond_total,
+      backgroundColor: D.cond_years.map(y => y === 2020 ? C.orange : C.teal),
+      borderRadius: 5
+    }]
+  },
+  options: { ...baseOpts(),
+    plugins: { ...baseOpts().plugins, legend: { display: false } },
+    scales: { ...baseOpts().scales,
+      y: { ...baseOpts().scales.y,
+        ticks: { color: '#8899aa', callback: v => (v/1000).toFixed(0)+'k' }
+      }
+    }
+  }
+});
+
+// ── 6. Condamnations detail ────────────────────────────────────────────────────
+new Chart(document.getElementById('chartCondDetail'), {
+  type: 'line',
+  data: {
+    labels: D.cond_years,
+    datasets: [
+      { label: 'Homicides volontaires', data: D.cond_homicides,
+        borderColor: C.red, backgroundColor: 'transparent', tension: 0.3, pointRadius: 5 },
+      { label: 'Viols', data: D.cond_viols,
+        borderColor: C.purple, backgroundColor: 'transparent', tension: 0.3, pointRadius: 5 },
+      { label: 'Vols & recels (÷100)', data: D.cond_vols.map(v => v ? Math.round(v/100) : null),
+        borderColor: C.blue, backgroundColor: 'transparent', tension: 0.3, pointRadius: 5,
+        borderDash: [4, 3] }
+    ]
+  },
+  options: { ...baseOpts() }
+});
+
+// ── 7. Prison population ──────────────────────────────────────────────────────
+new Chart(document.getElementById('chartPrison'), {
+  type: 'line',
+  data: {
+    labels: D.prison_years,
+    datasets: [{
+      label: 'Personnes écrouées',
+      data: D.prison_pop,
+      borderColor: C.orange,
+      backgroundColor: 'rgba(255,153,68,0.1)',
+      fill: true, tension: 0.3, pointRadius: 4
+    }]
+  },
+  options: { ...baseOpts(),
+    scales: { ...baseOpts().scales,
+      y: { ...baseOpts().scales.y,
+        ticks: { color: '#8899aa', callback: v => (v/1000).toFixed(0)+'k' }
+      }
+    }
+  }
+});
+
+// ── 8. Combo index chart ───────────────────────────────────────────────────────
+{
+  // Base 100 = 2012
+  const prisonBase = D.prison_pop[D.prison_years.indexOf(2012)];
+  const condBase   = D.cond_total[D.cond_years.indexOf(2012)];
+  const natBase    = D.nat_totals[D.nat_years.indexOf(2012)];
+
+  const commonYears = D.prison_years.filter(y => D.cond_years.includes(y));
+  new Chart(document.getElementById('chartCombo'), {
+    type: 'line',
+    data: {
+      labels: commonYears,
+      datasets: [
+        {
+          label: 'Crimes enregistrés', tension: 0.3, pointRadius: 4, borderWidth: 2,
+          borderColor: C.blue, backgroundColor: 'transparent',
+          data: commonYears.map(y => {
+            const v = D.nat_totals[D.nat_years.indexOf(y)];
+            return v ? +(v / natBase * 100).toFixed(1) : null;
+          })
+        },
+        {
+          label: 'Condamnations', tension: 0.3, pointRadius: 4, borderWidth: 2,
+          borderColor: C.teal, backgroundColor: 'transparent',
+          data: commonYears.map(y => {
+            const i = D.cond_years.indexOf(y);
+            const v = i >= 0 ? D.cond_total[i] : null;
+            return v ? +(v / condBase * 100).toFixed(1) : null;
+          })
+        },
+        {
+          label: 'Population carcérale', tension: 0.3, pointRadius: 4, borderWidth: 2,
+          borderColor: C.orange, backgroundColor: 'transparent',
+          data: commonYears.map(y => {
+            const v = D.prison_pop[D.prison_years.indexOf(y)];
+            return v ? +(v / prisonBase * 100).toFixed(1) : null;
+          })
+        }
+      ]
+    },
+    options: { ...baseOpts(),
+      scales: { ...baseOpts().scales,
+        y: { ...baseOpts().scales.y,
+          ticks: { color: '#8899aa', callback: v => v+'%' }
+        }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>

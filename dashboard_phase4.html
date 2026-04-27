@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 4 — Immigration × Criminalité × Justice (2016–2024)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f5;--card:#fff;--hdr:#1a1a2e;--text:#1a1a2e;--muted:#6c757d;
+  --blue:#4C72B0;--orange:#DD8452;--green:#55A868;--red:#C44E52;
+  --purple:#8172B3;--teal:#64B5CD;--brown:#937860;--olive:#5f8a5e;
+  --yellow:#e8b84b;--pink:#d48cb0;
+  --gap:16px;--r:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;}
+.wrap{max-width:1440px;margin:0 auto;padding:var(--gap);}
+
+/* HEADER */
+header{background:var(--hdr);color:#fff;padding:20px 28px;border-radius:var(--r);
+  margin-bottom:var(--gap);display:flex;justify-content:space-between;
+  align-items:center;flex-wrap:wrap;gap:10px;}
+header h1{font-size:18px;font-weight:700;}
+header .sub{font-size:11px;opacity:.6;margin-top:2px;}
+.filters{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.filters label{font-size:12px;opacity:.75;}
+.filters select{padding:5px 10px;border:1px solid rgba(255,255,255,.25);
+  border-radius:6px;background:rgba(255,255,255,.15);color:#fff;
+  font-size:13px;cursor:pointer;}
+.filters select option{background:#1a1a2e;}
+
+/* WARN */
+.warn{background:#fff8e1;border-left:4px solid #f9a825;border-radius:var(--r);
+  padding:10px 16px;font-size:11.5px;color:#5a4000;margin-bottom:var(--gap);line-height:1.5;}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--gap);margin-bottom:var(--gap);}
+.kpi{background:var(--card);border-radius:var(--r);padding:16px 20px;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid var(--blue);}
+.kpi.k2{border-color:var(--orange);}.kpi.k3{border-color:var(--green);}
+.kpi.k4{border-color:var(--red);}.kpi.k5{border-color:var(--purple);}
+.kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.6px;margin-bottom:4px;}
+.kpi-val{font-size:26px;font-weight:800;}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.kpi-chg{font-size:11px;font-weight:600;margin-top:3px;}
+.kpi-chg.up{color:#28a745;}.kpi-chg.dn{color:#dc3545;}
+
+/* GRID */
+.row-full{margin-bottom:var(--gap);}
+.row2{display:grid;grid-template-columns:3fr 2fr;gap:var(--gap);margin-bottom:var(--gap);}
+.row2b{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-bottom:var(--gap);}
+
+/* CARD */
+.card{background:var(--card);border-radius:var(--r);padding:20px 22px;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.card h3{font-size:13px;font-weight:700;margin-bottom:2px;}
+.card .desc{font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.4;}
+.chart-wrap{position:relative;}
+
+/* SOURCES */
+footer{font-size:11px;color:var(--muted);background:var(--card);
+  border-radius:var(--r);padding:12px 18px;box-shadow:0 1px 4px rgba(0,0,0,.07);
+  margin-top:var(--gap);}
+footer strong{font-size:12px;color:var(--text);display:block;margin-bottom:3px;}
+
+/* LEGEND ISR */
+.isr-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.isr-legend button{border:none;background:transparent;font-size:10.5px;
+  cursor:pointer;padding:3px 8px;border-radius:4px;border:1px solid #ddd;
+  color:var(--muted);transition:all .15s;}
+.isr-legend button.active{color:#fff;border-color:transparent;}
+
+@media(max-width:960px){
+  .kpis{grid-template-columns:repeat(3,1fr);}
+  .row2,.row2b{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Immigration × Criminalité × Justice en France — Phase 4</h1>
+    <div class="sub">SSMSI · DGEF · CJN/SDSE · DAP · INSEE — 2016–2024</div>
+  </div>
+  <div class="filters">
+    <label>Année</label>
+    <select id="sel-yr" onchange="setYear()">
+      <option>2024</option><option>2023</option><option>2022</option>
+      <option>2021</option><option>2020</option><option>2019</option>
+      <option>2018</option><option>2017</option><option>2016</option>
+    </select>
+  </div>
+</header>
+
+<div class="warn">
+  ⚠ <strong>Avertissement :</strong> MEC = personnes mises en cause (interpellées), pas condamnées — présomption d'innocence.
+  ISR = (% MEC étrangers) / (% étrangers dans la population). Un ISR > 1 mesure un écart statistique, pas une causalité.
+  Variables confondantes non contrôlées (précarité, âge, urbanisation). Données binaires FR/ÉTR uniquement.
+</div>
+
+<!-- KPIs -->
+<div class="kpis">
+  <div class="kpi">
+    <div class="kpi-lbl">ISR moyen</div>
+    <div class="kpi-val" id="k-isr">—</div>
+    <div class="kpi-sub">17 indicateurs (1 = proportionnel)</div>
+    <div class="kpi-chg" id="k-isr-chg"></div>
+  </div>
+  <div class="kpi k2">
+    <div class="kpi-lbl">Taux MEC ét. /1 000</div>
+    <div class="kpi-val" id="k-taux">—</div>
+    <div class="kpi-sub" id="k-taux-sub">vs — /1000 Français</div>
+    <div class="kpi-chg" id="k-taux-chg"></div>
+  </div>
+  <div class="kpi k3">
+    <div class="kpi-lbl">Flux titres de séjour</div>
+    <div class="kpi-val" id="k-flux">—</div>
+    <div class="kpi-sub" id="k-flux-sub">premiers titres pays tiers</div>
+    <div class="kpi-chg" id="k-flux-chg"></div>
+  </div>
+  <div class="kpi k4">
+    <div class="kpi-lbl">MEC étrangers</div>
+    <div class="kpi-val" id="k-mec">—</div>
+    <div class="kpi-sub" id="k-mec-sub">toutes infractions</div>
+    <div class="kpi-chg" id="k-mec-chg"></div>
+  </div>
+  <div class="kpi k5">
+    <div class="kpi-lbl">% étrangers population</div>
+    <div class="kpi-val" id="k-pop">—</div>
+    <div class="kpi-sub">source INSEE</div>
+  </div>
+</div>
+
+<!-- Chart 1 : Flux × Taux MEC -->
+<div class="row-full">
+  <div class="card">
+    <h3>① Flux d'immigration vs Taux de criminalité (2016–2024)</h3>
+    <div class="desc">Barres = flux annuels premiers titres de séjour délivrés (axe gauche).
+      Courbes = taux de MEC pour 1 000 habitants (axe droit). ISR moyen en violet.
+      <strong>Corrélation flux→MEC t+1 : r = +0,848 (p = 0,016, N=7, hors 2020 covid).</strong></div>
+    <div class="chart-wrap"><canvas id="c1" height="290"></canvas></div>
+  </div>
+</div>
+
+<!-- Chart 2 + 6 -->
+<div class="row2">
+  <div class="card">
+    <h3>② Évolution de l'ISR par indicateur (2016–2024)</h3>
+    <div class="desc">ISR = surreprésentation des étrangers dans les MEC relativement à leur poids
+      démographique. Ligne pointillée = ISR 1 (représentation proportionnelle).
+      Filtrer par groupe :</div>
+    <div class="isr-legend" id="isr-btns"></div>
+    <div class="chart-wrap" style="margin-top:10px"><canvas id="c2" height="310"></canvas></div>
+  </div>
+  <div class="card">
+    <h3>⑥ Taux MEC pour 1 000 habitants (2016–2024)</h3>
+    <div class="desc">Comparaison directe : étrangers vs Français. Le ratio oscille entre
+      <strong>2,1× et 2,5×</strong>. Tendance MEC étrangers en hausse significative
+      (Mann-Kendall z = 2,19, p = 0,029, Sen slope = +0,62/an).</div>
+    <div class="chart-wrap"><canvas id="c6" height="310"></canvas></div>
+  </div>
+</div>
+
+<!-- Chart 3 + 4 -->
+<div class="row2b">
+  <div class="card">
+    <h3>③ ISR par indicateur — comparaison 2016 vs 2024</h3>
+    <div class="desc">Barres groupées : rouge = hausse, vert = baisse vs 2016. 
+      ISR 1 = proportionnel à la population étrangère.</div>
+    <div class="chart-wrap"><canvas id="c3" height="420"></canvas></div>
+  </div>
+  <div class="card">
+    <h3>④ Composition des flux par motif de titre (2016–2023)</h3>
+    <div class="desc">Stacked bar : évolution de la composition des 327 000 premiers titres
+      délivrés en 2023. <strong>Montée de l'économique</strong> (10 % → 17 %),
+      recul du familial (40 % → 28 %).</div>
+    <div class="chart-wrap"><canvas id="c4" height="420"></canvas></div>
+  </div>
+</div>
+
+<!-- Chart 5 : Chaîne pénale -->
+<div class="row-full">
+  <div class="card">
+    <h3>⑤ Chaîne pénale — MEC → Condamnations → Prison (2016–2020)</h3>
+    <div class="desc">Volumes annuels : MEC étrangers + MEC français (axe gauche), condamnations totales + stock prison (axe droit).
+      Le taux d'aboutissement (condamn / MEC total) passe de <strong>66 % (2016) à 56 % (2020)</strong>.
+      Données prison disponibles 2016–2018 uniquement (source DAP).</div>
+    <div class="chart-wrap"><canvas id="c5" height="280"></canvas></div>
+  </div>
+</div>
+
+<footer>
+  <strong>Sources</strong>
+  SSMSI — Mis en cause par nationalité 2016-2025 (dataset 10) ·
+  DGEF — Premiers titres de séjour 2011-2023 ·
+  CJN/SDSE — Condamnations 2016-2020 ·
+  DAP — Population détenue FR/ET 2016-2018 ·
+  INSEE — Part étrangers dans la population 2016-2024
+</footer>
+</div><!-- end wrap -->
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// DONNÉES EMBARQUÉES
+// ════════════════════════════════════════════════════════════════════
+const YRS  = [2016,2017,2018,2019,2020,2021,2022,2023,2024];
+const YRS8 = [2016,2017,2018,2019,2020,2021,2022,2023];     // flux
+
+const FLUX  = [237210,254628,267421,287503,229388,282772,318926,326954];
+const T_ET  = [25.1,26.6,28.4,28.3,27.0,30.3,32.4,30.4,29.0];
+const T_FR  = [11.4,11.7,11.9,11.8,11.2,12.5,12.7,13.4,13.9];
+const ISR_M = [2.264,2.46,2.431,2.422,2.549,2.666,2.756,2.486,2.302];
+const PCT_POP = [6.8,7.0,7.2,7.4,7.6,7.7,7.8,8.2,8.8];
+
+const MEC_ET = [116108,127342,140236,143819,139721,161417,177355,176795,180532];
+const MEC_FR = [723250,742177,759447,752194,703900,796340,823665,873053,899081];
+
+// Flux par motif
+const FLUX_ECO  = [22690,27217,33336,39043,26705,36685,52045,54572];
+const FLUX_FAM  = [94341,94243,97663,98206,80660,93172,95939,91078];
+const FLUX_ETUD = [73864,80566,83974,90671,73394,88617,102134,108375];
+const FLUX_HUMA = [30369,37102,35710,38861,33801,41966,41455,46425];
+const FLUX_DIV  = [15946,15500,16738,20722,14828,22332,27353,26504];
+
+// Chaîne pénale
+const COND  = [557075,555203,548411,562668,469571,null,null,null,null];
+const PRIS_ET = [14875,15921,16374,null,null,null,null,null,null];
+const PRIS_FR = [61654,62779,63335,null,null,null,null,null,null];
+
+// ISR séries (9 indicateurs sélectionnés)
+const ISR_LABELS_FULL = [
+  'Cambriolages de logement',
+  'Vols dans les véhicules',
+  'Vols violents sans arme',
+  'Vols sans violence / personnes',
+  "Vols d'accessoires véhicules",
+  'Trafic de stupéfiants',
+  'Tentatives d\'homicide',
+  'Homicides',
+  'Viol. intra-familiales',
+  'Viols et tentatives',
+  'Viol. sexuelles',
+  'Viol. physiques hors VIF',
+  'Escroqueries',
+  'Destructions et dégradations',
+  'Usage de stupéfiants',
+  'Vols avec arme',
+  'Vols de véhicule',
+];
+const ISR_DATA_FULL = [
+  [3.825,3.949,4.697,4.295,4.745,5.19,5.309,4.64,4.26],
+  [2.635,3.12,3.519,3.662,4.28,4.413,4.747,4.862,4.44],
+  [3.122,3.557,4.124,3.978,4.717,4.508,4.518,3.759,3.352],
+  [3.312,3.374,3.613,3.886,3.784,4.045,4.214,3.716,3.327],
+  [2.344,4.293,1.71,1.676,2.184,3.403,3.442,2.609,2.38],
+  [1.806,1.932,2.072,2.165,1.979,2.245,2.447,2.414,2.459],
+  [2.751,2.809,2.839,2.534,2.288,2.474,2.578,2.259,2.226],
+  [null,2.183,2.123,2.001,1.895,1.766,1.671,1.594,2.033],
+  [2.409,2.289,2.269,2.264,2.148,2.019,1.919,1.886,1.853],
+  [2.087,2.183,2.123,2.001,1.895,1.766,1.671,1.594,1.558],
+  [1.943,1.953,1.943,1.865,1.725,1.684,1.699,1.573,1.447],
+  [1.824,1.865,1.858,1.854,1.824,1.797,1.803,1.749,1.744],
+  [2.065,1.887,1.941,1.878,1.934,1.886,1.717,1.619,1.482],
+  [1.44,1.329,1.443,1.501,1.549,1.582,1.64,1.561,1.45],
+  [1.268,1.324,1.421,1.458,1.418,1.487,1.638,1.379,1.426],
+  [2.287,2.493,2.416,2.485,2.287,2.469,2.599,2.477,2.464],
+  [1.109,1.207,1.074,1.111,1.254,1.239,1.321,1.283,1.232],
+];
+
+// ISR 2016 vs 2024 pour chart comparatif
+const ISR_CMP_LABELS = [
+  'Vols véhicules','Cambriolages','Vols violents','Vols/personnes',
+  'Vols arme','Trafic stup.','Tentatives hom.','Homicides',
+  'Viol. accessoires','VIF','Viols','Viol. sexuelles',
+  'Viol. physiques','Escroqueries','Destructions','Usage stup.','Vols véhicule'
+];
+const ISR_2016 = [2.635,3.825,3.122,3.312,2.287,1.806,2.751,null,2.344,2.409,2.087,1.943,1.824,2.065,1.44,1.268,1.109];
+const ISR_2024 = [4.44,4.26,3.352,3.327,2.464,2.459,2.226,2.033,2.38,1.853,1.558,1.447,1.744,1.482,1.45,1.426,1.232];
+
+const PALETTE = ['#4C72B0','#DD8452','#55A868','#C44E52','#8172B3',
+                 '#64B5CD','#937860','#e09b53','#5f8a5e','#d48cb0',
+                 '#a0c4ff','#b5ead7','#ffd6a5','#ffadad','#c5a0c5',
+                 '#e8d5b7','#b7d7e8'];
+
+// ════════════════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════════════════
+const charts = {};
+function fmtN(v,d=0){ if(v==null||isNaN(v)) return '—';
+  return d>0 ? v.toFixed(d) : Math.round(v).toLocaleString('fr-FR'); }
+function fmtK(v){ if(!v) return '—';
+  return v>=1e6 ? (v/1e6).toFixed(2)+'M' : v>=1e3 ? (v/1e3).toFixed(0)+'k' : v.toString(); }
+function chg(v,p,fmt='num'){
+  if(v==null||p==null) return {txt:'',cls:''};
+  const d = v-p, pct = (d/p*100);
+  const sign = d>=0?'+':'';
+  const txt = fmt==='pct'
+    ? `${sign}${d.toFixed(1)} pts vs an préc.`
+    : `${sign}${pct.toFixed(1)}% vs an préc.`;
+  return {txt, cls: d>=0?'up':'dn'};
+}
+function destroy(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+
+// Plugin ligne de référence ISR = 1
+const refLine1Plugin = {
+  id:'refLine1',
+  afterDraw(chart){
+    const {ctx, scales:{y,x}} = chart;
+    if(!y||!x) return;
+    const yp = y.getPixelForValue(1);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(100,100,100,0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(x.left,yp); ctx.lineTo(x.right,yp); ctx.stroke();
+    ctx.fillStyle = '#aaa'; ctx.font = '10px sans-serif';
+    ctx.fillText('ISR = 1', x.left+6, yp-4);
+    ctx.restore();
+  }
+};
+
+// ════════════════════════════════════════════════════════════════════
+// KPIs
+// ════════════════════════════════════════════════════════════════════
+function setYear(){
+  const yr = parseInt(document.getElementById('sel-yr').value);
+  const i  = YRS.indexOf(yr);
+  const ip = i-1;
+
+  // ISR moyen
+  const isr  = ISR_M[i];
+  const isrp = ip>=0 ? ISR_M[ip] : null;
+  document.getElementById('k-isr').textContent = isr ? isr.toFixed(2) : '—';
+  const ci = chg(isr,isrp,'pct');
+  const kc = document.getElementById('k-isr-chg');
+  kc.textContent = ci.txt; kc.className = 'kpi-chg '+ci.cls;
+
+  // Taux MEC
+  document.getElementById('k-taux').textContent = T_ET[i]?.toFixed(1) || '—';
+  document.getElementById('k-taux-sub').textContent = `vs ${T_FR[i]?.toFixed(1) || '—'}/1000 Français`;
+  const ct = chg(T_ET[i], ip>=0?T_ET[ip]:null,'pct');
+  const ktc = document.getElementById('k-taux-chg');
+  ktc.textContent = ct.txt; ktc.className = 'kpi-chg '+ct.cls;
+
+  // Flux
+  const fi = YRS8.indexOf(yr);
+  const flux = fi>=0 ? FLUX[fi] : null;
+  const fluxp = fi>0 ? FLUX[fi-1] : null;
+  document.getElementById('k-flux').textContent = flux ? fmtK(flux) : '—';
+  const cf = chg(flux, fluxp,'pct');
+  const kf = document.getElementById('k-flux-chg');
+  kf.textContent = cf.txt; kf.className = 'kpi-chg '+cf.cls;
+  document.getElementById('k-flux-sub').textContent = fi>=0 ? `premiers titres pays tiers` : 'données non disponibles';
+
+  // MEC étrangers
+  document.getElementById('k-mec').textContent = fmtK(MEC_ET[i]);
+  const cm = chg(MEC_ET[i], ip>=0?MEC_ET[ip]:null,'pct');
+  const km = document.getElementById('k-mec-chg');
+  km.textContent = cm.txt; km.className = 'kpi-chg '+cm.cls;
+  document.getElementById('k-mec-sub').textContent = `${fmtK(MEC_FR[i])} Français`;
+
+  // % population
+  document.getElementById('k-pop').textContent = PCT_POP[i]?.toFixed(1)+'%' || '—';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CHART 1 — Flux × Taux MEC
+// ════════════════════════════════════════════════════════════════════
+function buildC1(){
+  destroy('c1');
+  charts.c1 = new Chart(document.getElementById('c1'),{
+    type:'bar',
+    data:{
+      labels:YRS,
+      datasets:[
+        {type:'bar', label:'Flux titres de séjour (axe g.)', data:[...FLUX,null],
+         backgroundColor:'rgba(76,114,176,0.2)', borderColor:'#4C72B0',
+         borderWidth:1.5, borderRadius:4, yAxisID:'yL'},
+        {type:'line', label:'Taux MEC ét. /1000 (axe d.)', data:T_ET,
+         borderColor:'#DD8452', backgroundColor:'transparent', borderWidth:2.5,
+         tension:0.3, pointRadius:5, pointBackgroundColor:'#DD8452', yAxisID:'yR'},
+        {type:'line', label:'Taux MEC fr. /1000 (axe d.)', data:T_FR,
+         borderColor:'#55A868', backgroundColor:'transparent', borderWidth:2,
+         tension:0.3, pointRadius:4, pointBackgroundColor:'#55A868',
+         borderDash:[5,4], yAxisID:'yR'},
+        {type:'line', label:'ISR moyen (axe d.)', data:ISR_M,
+         borderColor:'#8172B3', backgroundColor:'transparent', borderWidth:2,
+         tension:0.3, pointRadius:3, borderDash:[8,3], yAxisID:'yR'},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{usePointStyle:true,padding:14,font:{size:12}}},
+        tooltip:{callbacks:{label(ctx){
+          const v = ctx.parsed.y;
+          if(v==null) return null;
+          if(ctx.datasetIndex===0) return `Flux : ${fmtN(v)} titres`;
+          if(ctx.datasetIndex===3) return `ISR moyen : ${v.toFixed(2)}`;
+          return `${ctx.dataset.label.split('(')[0].trim()} : ${v.toFixed(1)}/1000`;
+        }}}
+      },
+      scales:{
+        x:{grid:{display:false}, ticks:{font:{size:12}}},
+        yL:{position:'left',
+          title:{display:true,text:'Flux premiers titres (pays tiers)',font:{size:11}},
+          ticks:{callback:v=>v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1000?`${(v/1000).toFixed(0)}k`:v,
+            font:{size:11}},
+          grid:{color:'rgba(0,0,0,0.04)'}},
+        yR:{position:'right', min:0, max:40,
+          title:{display:true,text:'Taux /1000  |  ISR moyen',font:{size:11}},
+          ticks:{font:{size:11}}, grid:{display:false}},
+      }
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CHART 2 — ISR évolution (multi-lignes filtrable)
+// ════════════════════════════════════════════════════════════════════
+const ISR_GROUPS = {
+  'Vols patrimoniaux':[0,1,2,3,4,8,16],
+  'Stupéfiants':[5,14],
+  'Violences':[6,7,8,9,10,11,15],
+  'Autres':[12,13],
+};
+let activeGroup = 'Vols patrimoniaux';
+
+function buildC2(){
+  destroy('c2');
+  const indices = ISR_GROUPS[activeGroup] || [0,1,2,3,4];
+  const datasets = indices.map(i=>({
+    label: ISR_LABELS_FULL[i],
+    data: ISR_DATA_FULL[i],
+    borderColor: PALETTE[i],
+    backgroundColor:'transparent',
+    borderWidth:2, tension:0.3, pointRadius:3, pointHoverRadius:6,
+  }));
+
+  charts.c2 = new Chart(document.getElementById('c2'),{
+    type:'line',
+    data:{labels:YRS, datasets},
+    plugins:[refLine1Plugin],
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'bottom',labels:{usePointStyle:true,padding:8,font:{size:10.5}}},
+        tooltip:{callbacks:{label(ctx){
+          return `${ctx.dataset.label} : ${ctx.parsed.y?.toFixed(2) || '—'}`;
+        }}}
+      },
+      scales:{
+        x:{grid:{display:false}},
+        y:{min:0, max:6.5,
+          title:{display:true,text:'ISR (1 = proportionnel)',font:{size:11}},
+          ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},
+      }
+    }
+  });
+}
+
+function buildISRBtns(){
+  const wrap = document.getElementById('isr-btns');
+  wrap.innerHTML = '';
+  Object.keys(ISR_GROUPS).forEach(grp=>{
+    const btn = document.createElement('button');
+    btn.textContent = grp;
+    if(grp===activeGroup){
+      btn.classList.add('active');
+      btn.style.background = '#4C72B0';
+    }
+    btn.onclick = ()=>{
+      activeGroup = grp;
+      buildISRBtns();
+      buildC2();
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CHART 3 — ISR 2016 vs 2024 (barres horizontales groupées)
+// ════════════════════════════════════════════════════════════════════
+function buildC3(){
+  destroy('c3');
+  // Ordre décroissant par ISR 2024
+  const idx = ISR_2024.map((v,i)=>i).sort((a,b)=>(ISR_2024[b]||0)-(ISR_2024[a]||0));
+  const labs = idx.map(i=>ISR_CMP_LABELS[i]);
+  const d16  = idx.map(i=>ISR_2016[i]);
+  const d24  = idx.map(i=>ISR_2024[i]);
+
+  charts.c3 = new Chart(document.getElementById('c3'),{
+    type:'bar',
+    data:{
+      labels:labs,
+      datasets:[
+        {label:'ISR 2016', data:d16,
+         backgroundColor:'rgba(76,114,176,0.65)', borderColor:'#4C72B0', borderWidth:1, borderRadius:3},
+        {label:'ISR 2024', data:d24,
+         backgroundColor: d24.map((v,i)=>{
+           if(d16[i]==null||v==null) return 'rgba(150,150,150,0.5)';
+           return v>d16[i] ? 'rgba(196,78,82,0.75)' : 'rgba(85,168,104,0.75)';
+         }),
+         borderColor: d24.map((v,i)=>{
+           if(d16[i]==null||v==null) return '#aaa';
+           return v>d16[i] ? '#C44E52' : '#55A868';
+         }),
+         borderWidth:1, borderRadius:3},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      indexAxis:'y',
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{usePointStyle:true,font:{size:11}}},
+        tooltip:{callbacks:{label(ctx){
+          const v = ctx.parsed.x;
+          const delta = d24[ctx.dataIndex] && d16[ctx.dataIndex]
+            ? (d24[ctx.dataIndex]-d16[ctx.dataIndex]).toFixed(3) : '—';
+          return ctx.datasetIndex===1
+            ? `ISR 2024 : ${v?.toFixed(3) || '—'}  (Δ = ${delta})`
+            : `ISR 2016 : ${v?.toFixed(3) || 'n/d'}`;
+        }}}
+      },
+      scales:{
+        x:{min:0,max:6.5,
+          title:{display:true,text:'ISR',font:{size:11}},
+          ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},
+        y:{ticks:{font:{size:10}},grid:{display:false}},
+      }
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CHART 4 — Composition flux par motif (stacked)
+// ════════════════════════════════════════════════════════════════════
+function buildC4(){
+  destroy('c4');
+  charts.c4 = new Chart(document.getElementById('c4'),{
+    type:'bar',
+    data:{
+      labels:YRS8,
+      datasets:[
+        {label:'Familial',     data:FLUX_FAM,  backgroundColor:'rgba(76,114,176,0.8)',  stack:'s'},
+        {label:'Étudiants',    data:FLUX_ETUD, backgroundColor:'rgba(85,168,104,0.8)',  stack:'s'},
+        {label:'Humanitaire',  data:FLUX_HUMA, backgroundColor:'rgba(196,78,82,0.8)',   stack:'s'},
+        {label:'Économique',   data:FLUX_ECO,  backgroundColor:'rgba(221,132,82,0.8)',  stack:'s'},
+        {label:'Divers',       data:FLUX_DIV,  backgroundColor:'rgba(150,150,150,0.6)', stack:'s'},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'bottom',labels:{usePointStyle:true,padding:8,font:{size:11}}},
+        tooltip:{callbacks:{
+          label(ctx){
+            const tot = FLUX[ctx.dataIndex];
+            const pct = tot ? (ctx.parsed.y/tot*100).toFixed(1) : '—';
+            return `${ctx.dataset.label} : ${fmtN(ctx.parsed.y)}  (${pct}%)`;
+          },
+          footer(items){
+            const tot = FLUX[items[0]?.dataIndex];
+            return `Total : ${tot ? fmtN(tot) : '—'} titres`;
+          }
+        }}
+      },
+      scales:{
+        x:{grid:{display:false},stacked:true},
+        y:{stacked:true,
+          title:{display:true,text:'Nombre de titres délivrés',font:{size:11}},
+          ticks:{callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v, font:{size:11}},
+          grid:{color:'rgba(0,0,0,0.04)'}},
+      }
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CHART 5 — Chaîne pénale
+// ════════════════════════════════════════════════════════════════════
+function buildC5(){
+  destroy('c5');
+  const yrs5 = [2016,2017,2018,2019,2020];
+  charts.c5 = new Chart(document.getElementById('c5'),{
+    type:'bar',
+    data:{
+      labels:yrs5,
+      datasets:[
+        {type:'bar',  label:'MEC étrangers (axe g.)',  data:[116108,127342,140236,143819,139721],
+         backgroundColor:'rgba(196,78,82,0.7)',borderColor:'#C44E52',borderWidth:1,borderRadius:3,yAxisID:'yL'},
+        {type:'bar',  label:'MEC français (axe g.)',   data:[723250,742177,759447,752194,703900],
+         backgroundColor:'rgba(76,114,176,0.35)',borderColor:'#4C72B0',borderWidth:1,borderRadius:3,yAxisID:'yL'},
+        {type:'line', label:'Condamnations (axe d.)',  data:[557075,555203,548411,562668,469571],
+         borderColor:'#937860',backgroundColor:'transparent',borderWidth:2.5,
+         tension:0.3,pointRadius:6,pointBackgroundColor:'#937860',yAxisID:'yR'},
+        {type:'line', label:'Prison ét. × 100 (axe d.)',
+         data:[1487500,1592100,1637400,null,null],
+         borderColor:'#C44E52',backgroundColor:'transparent',borderWidth:2,
+         tension:0.3,pointRadius:5,borderDash:[5,3],yAxisID:'yR',
+         spanGaps:false},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}},
+        tooltip:{callbacks:{label(ctx){
+          const v = ctx.parsed.y;
+          if(v==null) return null;
+          if(ctx.datasetIndex===3) return `Prison étrangers : ${fmtN(v/100)}`;
+          return `${ctx.dataset.label.split('(')[0].trim()} : ${fmtN(v)}`;
+        }}}
+      },
+      scales:{
+        x:{grid:{display:false}},
+        yL:{position:'left',
+          title:{display:true,text:'MEC (mises en cause)',font:{size:11}},
+          ticks:{callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v,font:{size:11}},
+          grid:{color:'rgba(0,0,0,0.04)'}},
+        yR:{position:'right',
+          title:{display:true,text:'Condamnations  |  Prison ét.',font:{size:11}},
+          ticks:{callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v,font:{size:11}},
+          grid:{display:false}},
+      }
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CHART 6 — Taux MEC /1000
+// ════════════════════════════════════════════════════════════════════
+function buildC6(){
+  destroy('c6');
+  charts.c6 = new Chart(document.getElementById('c6'),{
+    type:'line',
+    data:{
+      labels:YRS,
+      datasets:[
+        {label:'Taux ét. /1000', data:T_ET,
+         borderColor:'#C44E52', backgroundColor:'rgba(196,78,82,0.08)',
+         borderWidth:2.5, fill:true, tension:0.3, pointRadius:5,
+         pointBackgroundColor:'#C44E52'},
+        {label:'Taux fr. /1000', data:T_FR,
+         borderColor:'#4C72B0', backgroundColor:'rgba(76,114,176,0.08)',
+         borderWidth:2.5, fill:true, tension:0.3, pointRadius:5,
+         pointBackgroundColor:'#4C72B0'},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{usePointStyle:true,font:{size:12}}},
+        tooltip:{callbacks:{
+          label(ctx){ return `${ctx.dataset.label} : ${ctx.parsed.y.toFixed(1)}/1000`; },
+          afterBody(items){
+            const et = T_ET[items[0].dataIndex];
+            const fr = T_FR[items[0].dataIndex];
+            return [`Ratio ét./fr. : ${(et/fr).toFixed(2)}×`];
+          }
+        }}
+      },
+      scales:{
+        x:{grid:{display:false}},
+        y:{min:0, max:38,
+          title:{display:true,text:'MEC pour 1 000 habitants',font:{size:11}},
+          ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},
+      }
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════════
+setYear();
+buildC1();
+buildISRBtns();
+buildC2();
+buildC3();
+buildC4();
+buildC5();
+buildC6();
+</script>
+</body>
+</html>

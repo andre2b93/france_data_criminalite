@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nationalité des Personnes Écrouées & MEC — France</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --header: #1a2744;
+      --accent: #2563eb;
+      --text: #1e293b;
+      --sub: #64748b;
+      --border: #e2e8f0;
+      --pos: #16a34a;
+      --neg: #dc2626;
+      --orange: #ea580c;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); }
+    .container { max-width:1380px; margin:0 auto; padding:16px; }
+
+    .header { background:var(--header); color:#fff; border-radius:12px; padding:22px 28px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+    .header h1 { font-size:20px; font-weight:700; line-height:1.3; }
+    .header .subtitle { font-size:12px; color:rgba(255,255,255,.6); margin-top:4px; }
+    .source-badge { background:rgba(255,255,255,.12); padding:6px 12px; border-radius:20px; font-size:11px; color:rgba(255,255,255,.8); white-space:nowrap; }
+
+    .notice { background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:10px 16px; font-size:12px; color:#9a3412; margin-bottom:14px; display:flex; gap:8px; align-items:flex-start; }
+
+    .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; }
+    .kpi { background:var(--card); border-radius:10px; padding:18px 20px; box-shadow:0 1px 3px rgba(0,0,0,.07); border-left:4px solid var(--accent); }
+    .kpi.orange { border-color:var(--orange); }
+    .kpi.red    { border-color:#ef4444; }
+    .kpi.green  { border-color:var(--pos); }
+    .kpi.purple { border-color:#7c3aed; }
+    .kpi .label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; color:var(--sub); margin-bottom:4px; }
+    .kpi .value { font-size:30px; font-weight:800; color:var(--text); line-height:1.1; }
+    .kpi .note  { font-size:11px; color:var(--sub); margin-top:4px; }
+
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+    .grid-1 { margin-bottom:12px; }
+
+    .card { background:var(--card); border-radius:10px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.07); }
+    .card h3 { font-size:13px; font-weight:700; color:var(--text); margin-bottom:3px; }
+    .card .chart-sub { font-size:11px; color:var(--sub); margin-bottom:14px; }
+    .card canvas { max-height:290px; }
+    .card canvas.tall { max-height:360px; }
+
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    th { padding:9px 10px; border-bottom:2px solid var(--border); color:var(--sub); font-weight:600; text-align:left; white-space:nowrap; cursor:pointer; user-select:none; }
+    th:hover { color:var(--text); }
+    td { padding:8px 10px; border-bottom:1px solid #f1f5f9; }
+    tr:hover td { background:#f8fafc; }
+    td.num { text-align:right; font-variant-numeric:tabular-nums; }
+
+    footer { text-align:center; font-size:11px; color:var(--sub); padding:16px 0 8px; }
+
+    @media (max-width:900px) {
+      .kpi-row { grid-template-columns:1fr 1fr; }
+      .grid-2 { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div>
+      <h1>🌍 Nationalité des Personnes Écrouées & Mis en Cause — France</h1>
+      <div class="subtitle">Milieu fermé (DAP / Ministère de la Justice) · MEC étrangers (SSMSI) · 2016–2022</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <span class="source-badge">Milieu fermé 2020–2022</span>
+      <span class="source-badge">SSMSI MEC 2016–2024</span>
+      <span class="source-badge">Instantané pays 2018</span>
+    </div>
+  </div>
+
+  <div class="notice">
+    <span style="font-size:16px;flex-shrink:0">ℹ️</span>
+    <span><strong>Note méthodologique :</strong> Les données SSMSI (mis en cause) ne distinguent que Française / Étrangère — sans détail par pays d'origine. Le détail géographique (Afrique, UE, Europe hors UE, Amériques, Asie…) provient des <strong>statistiques carcérales trimestrielles</strong> (Administration Pénitentiaire, « milieu fermé »), meilleur proxy disponible par origine. Le détail par pays (Algérie, Maroc, Tunisie…) n'est disponible que pour les fichiers 2017–2018.</span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi orange">
+      <div class="label">Étrangers condamnés détenus</div>
+      <div class="value">23,7 %</div>
+      <div class="note">T3 2022 — 12 308 / 51 978 détenus</div>
+    </div>
+    <div class="kpi red">
+      <div class="label">Part Afrique parmi étrangers</div>
+      <div class="value">60,5 %</div>
+      <div class="note">7 444 détenus africains sur 12 308 étrangers (T3 2022)</div>
+    </div>
+    <div class="kpi green">
+      <div class="label">% MEC étrangers — SSMSI 2024</div>
+      <div class="value">~20 %</div>
+      <div class="note">Pour 8,8 % d'étrangers dans la population totale</div>
+    </div>
+    <div class="kpi purple">
+      <div class="label">ISR moyen — 17 infractions 2024</div>
+      <div class="value">2,30×</div>
+      <div class="note">Surreprésentation ×2,3 vs poids démographique</div>
+    </div>
+  </div>
+
+  <!-- Row 1: Stacked bar + Donut -->
+  <div class="grid-2">
+    <div class="card">
+      <h3>Évolution des condamnés détenus par origine (2020–2022)</h3>
+      <div class="chart-sub">Effectifs trimestriels — Condamnés détenus — Milieu fermé (Administration Pénitentiaire)</div>
+      <canvas id="stackedTimeline" class="tall"></canvas>
+    </div>
+    <div class="card">
+      <h3>Composition des étrangers condamnés détenus — T3 2022</h3>
+      <div class="chart-sub">12 308 détenus étrangers par région géographique d'origine</div>
+      <canvas id="donutRegion"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 2: % comparaison + MEC timeline -->
+  <div class="grid-2">
+    <div class="card">
+      <h3>% d'étrangers : Prévenus vs Condamnés détenus (2020–2022)</h3>
+      <div class="chart-sub">Les prévenus (en attente de jugement) affichent une surreprésentation plus forte</div>
+      <canvas id="pctComparison"></canvas>
+    </div>
+    <div class="card">
+      <h3>% Mis en cause étrangers vs % population étrangère — SSMSI 2016–2024</h3>
+      <div class="chart-sub">Écart croissant entre la part dans les MEC et la part dans la population totale</div>
+      <canvas id="mecTimeline"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 3: Pays detail 2018 + ISR ranking -->
+  <div class="grid-2">
+    <div class="card">
+      <h3>Détail par pays d'Afrique — Détenus étrangers (octobre 2018)</h3>
+      <div class="chart-sub">Seul millésime avec ventilation Algérie / Maroc / Tunisie disponible dans les fichiers téléchargés</div>
+      <canvas id="paysDetail"></canvas>
+    </div>
+    <div class="card">
+      <h3>ISR 2024 par type d'infraction — SSMSI MEC</h3>
+      <div class="chart-sub">ISR = % MEC étrangers ÷ % étrangers dans la population (ISR=1 → représentation proportionnelle)</div>
+      <canvas id="isrRanking" class="tall"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 4: Table -->
+  <div class="card grid-1">
+    <h3>Détail trimestriel — Condamnés détenus par région (2020–2022)</h3>
+    <div class="chart-sub" style="margin-bottom:12px;">Cliquez sur un en-tête pour trier · La dernière colonne montre la part de l'Afrique parmi les détenus étrangers</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">Période</th>
+            <th onclick="sortTable(1)" style="text-align:right">France</th>
+            <th onclick="sortTable(2)" style="text-align:right">UE hors FR</th>
+            <th onclick="sortTable(3)" style="text-align:right">Europe hs UE</th>
+            <th onclick="sortTable(4)" style="text-align:right">Afrique</th>
+            <th onclick="sortTable(5)" style="text-align:right">Amériques</th>
+            <th onclick="sortTable(6)" style="text-align:right">Asie+Océanie</th>
+            <th onclick="sortTable(7)" style="text-align:right">Autres</th>
+            <th onclick="sortTable(8)" style="text-align:right">Total</th>
+            <th onclick="sortTable(9)" style="text-align:right">% Étrangers</th>
+            <th>Part Afrique / étrangers</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    Sources : Direction de l'Administration Pénitentiaire (Ministère de la Justice) · SSMSI / data.gouv.fr · INSEE séries population étrangère<br>
+    Données carcérales : T4 2020 → T3 2022 · Données MEC : 2016–2024 (SSMSI)
+  </footer>
+</div>
+
+<script>
+// ── Embedded data ─────────────────────────────────────────────────────────────
+const CONDAMNES = [
+  {label:"Q4 2020",France:33759,UE:1775,EurHUE:822,Afrique:5716,Amerique:748,Asie:834,Autres:41,Total:43695,TotalEtr:9936,PctEtr:22.7},
+  {label:"Q1 2021",France:35346,UE:1743,EurHUE:849,Afrique:5990,Amerique:802,Asie:871,Autres:43,Total:45644,TotalEtr:10298,PctEtr:22.6},
+  {label:"Q2 2021",France:36921,UE:1779,EurHUE:939,Afrique:6351,Amerique:834,Asie:886,Autres:57,Total:47767,TotalEtr:10846,PctEtr:22.7},
+  {label:"Q3 2021",France:37839,UE:1825,EurHUE:996,Afrique:6627,Amerique:861,Asie:882,Autres:63,Total:49093,TotalEtr:11254,PctEtr:22.9},
+  {label:"Q4 2021",France:38160,UE:1908,EurHUE:953,Afrique:6906,Amerique:929,Asie:938,Autres:65,Total:49859,TotalEtr:11699,PctEtr:23.5},
+  {label:"Q1 2022",France:38845,UE:1971,EurHUE:953,Afrique:7046,Amerique:943,Asie:921,Autres:72,Total:50751,TotalEtr:11906,PctEtr:23.5},
+  {label:"Q2 2022",France:39443,UE:1937,EurHUE:956,Afrique:7350,Amerique:982,Asie:944,Autres:55,Total:51667,TotalEtr:12224,PctEtr:23.7},
+  {label:"Q3 2022",France:39670,UE:1922,EurHUE:952,Afrique:7444,Amerique:994,Asie:938,Autres:58,Total:51978,TotalEtr:12308,PctEtr:23.7},
+];
+
+const PREVENUS = [
+  {label:"Q4 2020",PctEtr:30.4},
+  {label:"Q1 2021",PctEtr:30.1},
+  {label:"Q2 2021",PctEtr:30.7},
+  {label:"Q3 2021",PctEtr:31.3},
+  {label:"Q4 2021",PctEtr:31.1},
+  {label:"Q1 2022",PctEtr:31.1},
+  {label:"Q2 2022",PctEtr:30.7},
+  {label:"Q3 2022",PctEtr:30.8},
+];
+
+const PAYS_2018 = [
+  {pays:"UE hors France",   effectifs:3421, region:"eur"},
+  {pays:"Autres Afrique",   effectifs:2630, region:"afr"},
+  {pays:"Europe hors UE",   effectifs:2346, region:"eur"},
+  {pays:"Algérie",          effectifs:2233, region:"afr"},
+  {pays:"Maroc",            effectifs:2007, region:"afr"},
+  {pays:"Amériques",        effectifs:1413, region:"ame"},
+  {pays:"Tunisie",          effectifs:989,  region:"afr"},
+  {pays:"Asie",             effectifs:824,  region:"asi"},
+  {pays:"Autres/Inconnu",   effectifs:69,   region:"aut"},
+];
+
+const ISR_2024 = [
+  {ind:"Vols dans les véhicules",      isr:4.44},
+  {ind:"Cambriolages logement",        isr:4.23},
+  {ind:"Vols violents sans arme",      isr:3.89},
+  {ind:"Vols sans violence / pers.",   isr:3.73},
+  {ind:"Vols accessoires / véhicules", isr:2.59},
+  {ind:"Homicides",                    isr:2.51},
+  {ind:"Trafic de stupéfiants",        isr:2.46},
+  {ind:"Vols avec arme",               isr:2.39},
+  {ind:"Violences physiques non cjal", isr:2.20},
+  {ind:"Coups et blessures vol.",      isr:2.04},
+  {ind:"Violences sexuelles",          isr:1.91},
+  {ind:"Viols",                        isr:1.81},
+  {ind:"Violences intrafamiliales",    isr:1.68},
+  {ind:"Escroqueries",                 isr:1.66},
+  {ind:"Destructions / dégradations",  isr:1.58},
+  {ind:"Usage de stupéfiants",         isr:1.38},
+  {ind:"Vols de véhicule",             isr:1.20},
+];
+
+const MEC_TL = [
+  {y:2016,mec:13.8,pop:6.8},{y:2017,mec:14.6,pop:7.0},{y:2018,mec:15.6,pop:7.2},
+  {y:2019,mec:16.5,pop:7.5},{y:2020,mec:16.1,pop:7.7},{y:2021,mec:17.3,pop:8.0},
+  {y:2022,mec:19.0,pop:8.4},{y:2023,mec:19.9,pop:8.6},{y:2024,mec:20.1,pop:8.8},
+];
+
+// ── Palette ────────────────────────────────────────────────────────────────
+const C = {
+  fr:'#3b82f6', ue:'#8b5cf6', ehu:'#a78bfa',
+  afr:'#f97316', ame:'#22c55e', asi:'#ec4899', aut:'#94a3b8',
+};
+
+const fmt = n => n.toLocaleString('fr-FR');
+
+// ── Chart 1: Stacked bars condamnés ────────────────────────────────────────
+new Chart(document.getElementById('stackedTimeline'), {
+  type:'bar',
+  data:{
+    labels: CONDAMNES.map(d=>d.label),
+    datasets:[
+      {label:'France',         data:CONDAMNES.map(d=>d.France),   backgroundColor:C.fr+'CC', stack:'s'},
+      {label:'UE hors France', data:CONDAMNES.map(d=>d.UE),       backgroundColor:C.ue+'CC', stack:'s'},
+      {label:'Europe hors UE', data:CONDAMNES.map(d=>d.EurHUE),   backgroundColor:C.ehu+'CC',stack:'s'},
+      {label:'Afrique',        data:CONDAMNES.map(d=>d.Afrique),  backgroundColor:C.afr+'CC',stack:'s'},
+      {label:'Amériques',      data:CONDAMNES.map(d=>d.Amerique), backgroundColor:C.ame+'CC',stack:'s'},
+      {label:'Asie+Océanie',   data:CONDAMNES.map(d=>d.Asie),     backgroundColor:C.asi+'CC',stack:'s'},
+      {label:'Autres',         data:CONDAMNES.map(d=>d.Autres),   backgroundColor:C.aut+'CC',stack:'s'},
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{position:'bottom',labels:{usePointStyle:true,padding:10,font:{size:11}}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`}}
+    },
+    scales:{
+      x:{grid:{display:false}},
+      y:{stacked:true, ticks:{callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v}}
+    }
+  }
+});
+
+// ── Chart 2: Donut région T3 2022 ──────────────────────────────────────────
+{
+  const last = CONDAMNES[CONDAMNES.length-1];
+  new Chart(document.getElementById('donutRegion'), {
+    type:'doughnut',
+    data:{
+      labels:['UE hors France','Europe hors UE','Afrique','Amériques','Asie+Océanie','Autres'],
+      datasets:[{
+        data:[last.UE, last.EurHUE, last.Afrique, last.Amerique, last.Asie, last.Autres],
+        backgroundColor:[C.ue, C.ehu, C.afr, C.ame, C.asi, C.aut],
+        borderColor:'#fff', borderWidth:2
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'58%',
+      plugins:{
+        legend:{position:'right',labels:{usePointStyle:true,padding:12,font:{size:11}}},
+        tooltip:{callbacks:{label:ctx=>{
+          const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);
+          return ` ${ctx.label}: ${fmt(ctx.parsed)} (${(ctx.parsed/tot*100).toFixed(1)}%)`;
+        }}}
+      }
+    }
+  });
+}
+
+// ── Chart 3: % étrangers condamnés vs prévenus ────────────────────────────
+new Chart(document.getElementById('pctComparison'), {
+  type:'line',
+  data:{
+    labels:CONDAMNES.map(d=>d.label),
+    datasets:[
+      {label:'Condamnés détenus %', data:CONDAMNES.map(d=>d.PctEtr),
+        borderColor:C.fr, backgroundColor:C.fr+'18', fill:true, tension:.3, borderWidth:2.5, pointRadius:4},
+      {label:'Prévenus (détenus) %', data:PREVENUS.map(d=>d.PctEtr),
+        borderColor:C.afr, backgroundColor:C.afr+'12', fill:true, tension:.3, borderWidth:2.5, pointRadius:4, borderDash:[5,4]},
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{position:'bottom',labels:{usePointStyle:true,padding:12,font:{size:11}}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`}}
+    },
+    scales:{
+      x:{grid:{display:false}},
+      y:{min:18, max:36, ticks:{callback:v=>v+'%'}}
+    }
+  }
+});
+
+// ── Chart 4: MEC % vs pop % ─────────────────────────────────────────────────
+new Chart(document.getElementById('mecTimeline'), {
+  type:'line',
+  data:{
+    labels:MEC_TL.map(d=>d.y),
+    datasets:[
+      {label:'% MEC étrangers (SSMSI)', data:MEC_TL.map(d=>d.mec),
+        borderColor:'#ef4444', backgroundColor:'#ef444418', fill:true, tension:.3, borderWidth:2.5, pointRadius:4},
+      {label:'% Étrangers dans la population', data:MEC_TL.map(d=>d.pop),
+        borderColor:C.fr, backgroundColor:C.fr+'12', fill:true, tension:.3, borderWidth:2.5, pointRadius:4, borderDash:[5,4]},
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{position:'bottom',labels:{usePointStyle:true,padding:12,font:{size:11}}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`}}
+    },
+    scales:{
+      x:{grid:{display:false}},
+      y:{min:0, max:26, ticks:{callback:v=>v+'%'}}
+    }
+  }
+});
+
+// ── Chart 5: Pays détail 2018 (horizontal bar) ────────────────────────────
+{
+  const sorted=[...PAYS_2018].sort((a,b)=>b.effectifs-a.effectifs);
+  const colMap={afr:C.afr+'CC', eur:C.ue+'CC', ame:C.ame+'CC', asi:C.asi+'CC', aut:C.aut+'CC'};
+  new Chart(document.getElementById('paysDetail'), {
+    type:'bar',
+    data:{
+      labels:sorted.map(d=>d.pays),
+      datasets:[{
+        label:'Détenus étrangers (oct. 2018)',
+        data:sorted.map(d=>d.effectifs),
+        backgroundColor:sorted.map(d=>colMap[d.region]),
+        borderRadius:4
+      }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>{
+          const tot=PAYS_2018.reduce((s,p)=>s+p.effectifs,0);
+          return ` ${fmt(ctx.parsed.x)} détenus (${(ctx.parsed.x/tot*100).toFixed(1)}%)`;
+        }}}
+      },
+      scales:{
+        x:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>v>=1000?`${(v/1000).toFixed(1)}k`:v}},
+        y:{grid:{display:false}}
+      }
+    }
+  });
+}
+
+// ── Chart 6: ISR ranking ────────────────────────────────────────────────────
+{
+  const sorted=[...ISR_2024].sort((a,b)=>b.isr-a.isr);
+  const colors=sorted.map(d=>d.isr>=3?'#ef4444CC':d.isr>=2?'#f97316CC':d.isr>=1.5?'#eab308CC':'#22c55eCC');
+  new Chart(document.getElementById('isrRanking'), {
+    type:'bar',
+    data:{
+      labels:sorted.map(d=>d.ind),
+      datasets:[
+        {label:'ISR 2024', data:sorted.map(d=>d.isr), backgroundColor:colors, borderRadius:3},
+        {type:'line', label:'Référence ISR = 1,0', data:sorted.map(()=>1.0),
+          borderColor:'#3b82f6', borderWidth:1.5, borderDash:[4,3], pointRadius:0},
+      ]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{usePointStyle:true,padding:12,font:{size:11}}},
+        tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===0?` ISR = ${ctx.parsed.x.toFixed(2)}`:null}}
+      },
+      scales:{
+        x:{min:0, max:5, ticks:{callback:v=>v.toFixed(1)}, grid:{color:'#f1f5f9'}},
+        y:{grid:{display:false}, ticks:{font:{size:11}}}
+      }
+    }
+  });
+}
+
+// ── Table ───────────────────────────────────────────────────────────────────
+let sortCol=0, sortDir=-1;
+function renderTable(){
+  const keys=['label','France','UE','EurHUE','Afrique','Amerique','Asie','Autres','Total','PctEtr'];
+  const data=[...CONDAMNES].sort((a,b)=>{
+    const k=keys[sortCol];
+    return (a[k]>b[k]?1:-1)*sortDir;
+  });
+  document.getElementById('tableBody').innerHTML=data.map(d=>{
+    const pctAfr=(d.Afrique/d.TotalEtr*100).toFixed(1);
+    const w=Math.round(d.Afrique/d.TotalEtr*100);
+    return `<tr>
+      <td><strong>${d.label}</strong></td>
+      <td class="num">${fmt(d.France)}</td>
+      <td class="num">${fmt(d.UE)}</td>
+      <td class="num">${fmt(d.EurHUE)}</td>
+      <td class="num" style="color:#ea580c;font-weight:600">${fmt(d.Afrique)}</td>
+      <td class="num">${fmt(d.Amerique)}</td>
+      <td class="num">${fmt(d.Asie)}</td>
+      <td class="num">${fmt(d.Autres)}</td>
+      <td class="num"><strong>${fmt(d.Total)}</strong></td>
+      <td class="num" style="color:#ef4444;font-weight:700">${d.PctEtr}%</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:${w}%;height:10px;background:#f97316;border-radius:3px;min-width:2px"></div>
+          <span style="font-size:11px;color:#64748b">${pctAfr}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+window.sortTable=function(col){
+  if(sortCol===col)sortDir=-sortDir;else{sortCol=col;sortDir=-1;}
+  renderTable();
+};
+renderTable();
+</script>
+</body>
+</html>

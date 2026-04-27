@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Criminalité en France — Panorama complet & Nationalité</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --fr:   #3b82f6;
+  --et:   #ef4444;
+  --pop:  #10b981;
+  --bg:   #0f172a;
+  --s1:   #1e293b;
+  --s2:   #162032;
+  --card: #1e293b;
+  --brd:  #2d3f55;
+  --txt:  #e2e8f0;
+  --mut:  #94a3b8;
+  --acc:  #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--txt); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
+
+/* ── Navigation ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(15,23,42,.95); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--brd);
+  display: flex; align-items: center; gap: 0; padding: 0 24px; height: 44px;
+  overflow-x: auto;
+}
+nav a {
+  color: var(--mut); text-decoration: none; font-size: .75rem; font-weight: 600;
+  padding: 0 14px; height: 44px; display: flex; align-items: center;
+  white-space: nowrap; border-bottom: 2px solid transparent;
+  text-transform: uppercase; letter-spacing: .05em; transition: color .2s;
+}
+nav a:hover { color: var(--txt); border-bottom-color: var(--brd); }
+nav .brand { color: #60a5fa; font-weight: 700; margin-right: 8px; font-size: .8rem; white-space: nowrap; }
+
+/* ── Header ── */
+header {
+  background: linear-gradient(135deg, #1a2844 0%, #0f172a 100%);
+  border-bottom: 1px solid var(--brd); padding: 28px 32px 22px;
+}
+header h1 { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
+header h1 span { color: #60a5fa; }
+header p { color: var(--mut); font-size: .875rem; margin-top: 6px; max-width: 800px; line-height: 1.5; }
+.legend-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.leg { display: flex; align-items: center; gap: 6px; font-size: .75rem; font-weight: 600; }
+.dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── KPIs ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; padding: 20px 32px; }
+@media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+.kpi { background: var(--card); border: 1px solid var(--brd); border-radius: 10px; padding: 14px 16px; }
+.kpi .val { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+.kpi .mult { font-size: .78rem; font-weight: 700; margin-top: 4px; }
+.kpi .lbl { font-size: .7rem; color: var(--mut); margin-top: 4px; line-height: 1.3; }
+.kpi .src { font-size: .65rem; color: #475569; margin-top: 3px; }
+
+/* ── Section wrapper ── */
+.section { padding: 24px 32px; }
+.section:nth-child(even) { background: var(--s2); }
+.section-title {
+  font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
+  color: #475569; margin-bottom: 16px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--brd);
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title span { font-size: 1rem; }
+
+/* ── Chart grid ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+.grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 18px; }
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }
+.full { grid-column: 1 / -1; }
+
+.card { background: var(--card); border: 1px solid var(--brd); border-radius: 10px; padding: 18px; }
+.card h3 { font-size: .78rem; font-weight: 700; color: var(--mut);
+  text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+.card .sub { font-size: .68rem; color: #475569; margin-bottom: 14px; line-height: 1.4; }
+.ch { position: relative; }
+.h200 { height: 200px; }
+.h260 { height: 260px; }
+.h300 { height: 300px; }
+.h380 { height: 380px; }
+.h460 { height: 460px; }
+
+/* ── Info box ── */
+.info {
+  background: rgba(16,185,129,.07); border-left: 3px solid var(--pop);
+  padding: 9px 12px; border-radius: 0 6px 6px 0;
+  font-size: .72rem; color: #a7f3d0; margin-bottom: 12px; line-height: 1.5;
+}
+.info strong { color: #6ee7b7; }
+.warn {
+  background: rgba(245,158,11,.08); border-left: 3px solid var(--acc);
+  padding: 9px 12px; border-radius: 0 6px 6px 0;
+  font-size: .72rem; color: #fcd34d; line-height: 1.5;
+}
+
+footer {
+  text-align: center; padding: 20px 32px; color: #334155; font-size: .7rem;
+  border-top: 1px solid var(--brd); line-height: 1.8;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">🇫🇷 Criminalité France</span>
+  <a href="#panorama">Panorama</a>
+  <a href="#absolu">Valeurs absolues</a>
+  <a href="#taux">Taux / 1 000 hab.</a>
+  <a href="#proportions">Proportions</a>
+  <a href="#isr">Surreprésentation</a>
+  <a href="#infractions">Par infraction</a>
+  <a href="#chaine">Chaîne pénale</a>
+</nav>
+
+<header>
+  <h1>Criminalité en France — <span>Panorama &amp; Nationalité</span></h1>
+  <p>Vue d'ensemble de la délinquance enregistrée, répartition par nationalité des mis en cause et des victimes,
+     et indice de surreprésentation rapporté au poids démographique des étrangers (INSEE).
+     Sources : SSMSI / data.gouv.fr · Casier judiciaire national · DAP · INSEE</p>
+  <div class="legend-row">
+    <div class="leg"><div class="dot" style="background:var(--fr)"></div> Français</div>
+    <div class="leg"><div class="dot" style="background:var(--et)"></div> Étrangers</div>
+    <div class="leg"><div class="dot" style="background:var(--pop); border-radius:50%"></div> Part étrangers dans la population (INSEE)</div>
+    <div class="leg"><div class="dot" style="background:var(--acc)"></div> Référence proportionnelle (ISR = 1,0×)</div>
+  </div>
+</header>
+
+<!-- ── KPIs ── -->
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="val" style="color:#f87171">16,8 %</div>
+    <div class="mult" style="color:#fca5a5">× 1,9 la pop. étrangère</div>
+    <div class="lbl">des mis en cause sont étrangers</div>
+    <div class="src">2024 — SSMSI</div>
+  </div>
+  <div class="kpi">
+    <div class="val" style="color:#60a5fa">11,9 %</div>
+    <div class="mult" style="color:#93c5fd">× 1,4 la pop. étrangère</div>
+    <div class="lbl">des victimes sont étrangères</div>
+    <div class="src">2024 — SSMSI</div>
+  </div>
+  <div class="kpi">
+    <div class="val" style="color:#fbbf24">15,7 %</div>
+    <div class="mult" style="color:#fcd34d">× 2,2 la pop. étrangère</div>
+    <div class="lbl">des condamnés sont étrangers</div>
+    <div class="src">2020 — Casier judiciaire</div>
+  </div>
+  <div class="kpi">
+    <div class="val" style="color:#a78bfa">20,2 %</div>
+    <div class="mult" style="color:#c4b5fd">× 2,6 la pop. étrangère</div>
+    <div class="lbl">des personnes écrouées sont étrangères</div>
+    <div class="src">2017 — DAP</div>
+  </div>
+  <div class="kpi">
+    <div class="val" style="color:#34d399">8,8 %</div>
+    <div class="mult" style="color:#6ee7b7">de la population totale</div>
+    <div class="lbl">sont des ressortissants étrangers en France</div>
+    <div class="src">2024 — INSEE Première n°2076</div>
+  </div>
+  <div class="kpi">
+    <div class="val" style="color:#fb923c">3,9×</div>
+    <div class="mult" style="color:#fdba74">ISR max (cambriolages)</div>
+    <div class="lbl">surreprésentation max des étrangers parmi les MEC</div>
+    <div class="src">2016–2025 — SSMSI</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 1 — PANORAMA GÉNÉRAL
+════════════════════════════════════════════════════════════════════════ -->
+<div id="panorama" class="section">
+  <div class="section-title"><span>📊</span> Panorama général — délinquance enregistrée</div>
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>Total crimes &amp; délits enregistrés — 2000–2021</h3>
+      <p class="sub">Ensemble PN + GN, France entière (107 indicateurs SSMSI). La baisse 2020 reflète les confinements.</p>
+      <div class="ch h260"><canvas id="totalTrend"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>Évolution par grande catégorie — 2000–2021</h3>
+      <p class="sub">Valeurs absolues (nb de faits). Les homicides &amp; violences sont en forte hausse continue ; les vols sans violence ont reculé.</p>
+      <div class="ch h260"><canvas id="catTrend"></canvas></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 2 — VALEURS ABSOLUES PAR NATIONALITÉ
+════════════════════════════════════════════════════════════════════════ -->
+<div id="absolu" class="section">
+  <div class="section-title"><span>🔢</span> Mis en cause &amp; victimes — valeurs absolues par nationalité</div>
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>Mis en cause — Français vs Étrangers (nb, 2016–2025)</h3>
+      <p class="sub">Nombre total de personnes interpelées. Étrangers : +57 % en 9 ans (+521 K). Français : +30 %.</p>
+      <div class="ch h300"><canvas id="mecAbs"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>Victimes — Françaises vs Étrangères (nb, 2016–2025)</h3>
+      <p class="sub">Nombre de victimes enregistrées. La part des victimes étrangères reste stable (~11–12 %).</p>
+      <div class="ch h300"><canvas id="vicAbs"></canvas></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 2b — TAUX POUR 1 000 HABITANTS PAR GROUPE
+════════════════════════════════════════════════════════════════════════ -->
+<div id="taux" class="section">
+  <div class="section-title"><span>📏</span> Taux pour 1 000 habitants — rapporté au poids de chaque groupe</div>
+  <div class="info">
+    <strong>Lecture :</strong> on divise le nombre de mis en cause (ou de victimes) de chaque groupe
+    par la taille de ce groupe dans la population totale (sources INSEE). Le résultat s'exprime
+    en <strong>nombre de mises en cause pour 1 000 personnes</strong> appartenant au groupe —
+    indépendamment du fait qu'un groupe est numériquement plus grand que l'autre.
+    C'est la mesure la plus directe de la probabilité individuelle d'être mis en cause ou victime.
+  </div>
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>Mis en cause pour 1 000 hab. — Français vs Étrangers (2016–2025)</h3>
+      <p class="sub">En 2024 : 114 mis en cause pour 1 000 Français · 238 pour 1 000 étrangers. Le taux étranger a baissé depuis 2022 (264 → 238) tandis que le taux français continue d'augmenter.</p>
+      <div class="ch h280"><canvas id="mecTaux"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>Victimes pour 1 000 hab. — Françaises vs Étrangères (2016–2025)</h3>
+      <p class="sub">En 2024 : 327 victimes pour 1 000 Français · 459 pour 1 000 étrangers. Le taux de victimisation des étrangers est en baisse depuis 2019 (519 → 459).</p>
+      <div class="ch h280"><canvas id="vicTaux"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- Barre de comparaison 2024 -->
+  <div style="margin-top:18px">
+  <div class="card">
+    <h3>Comparaison 2024 — taux pour 1 000 habitants par groupe &amp; catégorie</h3>
+    <p class="sub">Visualisation côte à côte des taux pour chaque groupe. Le ratio ×N indique combien de fois le taux étranger est supérieur au taux français.</p>
+    <div class="ch h220"><canvas id="tauxComp2024"></canvas></div>
+  </div>
+  </div>
+
+  <!-- Évolution du ratio -->
+  <div style="margin-top:18px">
+  <div class="card">
+    <h3>Évolution du ratio — taux étrangers ÷ taux français (2016–2025)</h3>
+    <p class="sub">Un ratio de 2,0 signifie qu'un étranger est, en moyenne, 2× plus souvent mis en cause qu'un Français pour 1 000 personnes de chaque groupe. La convergence récente est visible.</p>
+    <div class="ch h220"><canvas id="ratioTaux"></canvas></div>
+  </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 3 — PROPORTIONS & RÉFÉRENCE POPULATION
+════════════════════════════════════════════════════════════════════════ -->
+<div id="proportions" class="section">
+  <div class="section-title"><span>📐</span> Proportions — part des étrangers rapportée à leur poids démographique</div>
+  <div class="info">
+    La <strong>ligne verte pointillée</strong> représente la part des étrangers dans la population française selon l'INSEE
+    (6,6 % en 2016 → 8,8 % en 2024). C'est la référence de proportionnalité : si les étrangers étaient représentés
+    exactement à leur poids démographique, les courbes rouge et bleue coïncideraient avec la verte.
+  </div>
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>% étrangers parmi les mis en cause vs population</h3>
+      <p class="sub">La part des étrangers parmi les MEC (rouge) dépasse largement leur poids démographique (vert) sur toute la période.</p>
+      <div class="ch h260"><canvas id="mecPct"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>% étrangers parmi les victimes vs population</h3>
+      <p class="sub">Les étrangers sont aussi sur-victimisés (~+40 % au-dessus de leur poids démographique), quoique dans une moindre mesure.</p>
+      <div class="ch h260"><canvas id="vicPct"></canvas></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 4 — INDICE DE SURREPRÉSENTATION
+════════════════════════════════════════════════════════════════════════ -->
+<div id="isr" class="section">
+  <div class="section-title"><span>⚖️</span> Indice de surreprésentation (ISR) — évolution temporelle</div>
+  <div class="grid-2">
+
+    <div class="card full">
+      <h3>ISR mis en cause &amp; victimes — 2016–2025</h3>
+      <div class="info">
+        <strong>ISR = % dans la catégorie ÷ % dans la population.</strong>
+        ISR = 1,0 → proportionnel. ISR = 2,0 → deux fois plus représenté que le poids démographique.
+        L'ISR MEC (rouge) diminue depuis 2022, porté par la croissance de la population étrangère elle-même.
+        L'ISR victimes (bleu) suit la même tendance décroissante.
+      </div>
+      <div class="ch h260"><canvas id="isrTrend"></canvas></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 5 — PAR TYPE D'INFRACTION
+════════════════════════════════════════════════════════════════════════ -->
+<div id="infractions" class="section">
+  <div class="section-title"><span>🔎</span> Détail par type d'infraction (2016–2025 cumulé)</div>
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>% étrangers parmi les mis en cause — par infraction</h3>
+      <p class="sub">
+        <span style="color:#ef4444">▬</span> Moyenne globale (17,0 %) &nbsp;
+        <span style="color:#10b981">▬</span> Poids démographique (~7,5 %)
+      </p>
+      <div class="ch h460"><canvas id="mecIndicBar"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>% étrangers parmi les victimes — par infraction</h3>
+      <p class="sub">
+        <span style="color:#3b82f6">▬</span> Moyenne globale (11,6 %) &nbsp;
+        <span style="color:#10b981">▬</span> Poids démographique (~7,5 %)
+      </p>
+      <div class="ch h460"><canvas id="vicIndicBar"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- ISR full width -->
+  <div style="margin-top:18px">
+  <div class="card">
+    <h3>Indice de surreprésentation (ISR) des étrangers parmi les mis en cause — par infraction</h3>
+    <p class="sub">
+      Rapport % MEC étrangers ÷ % pop étrangère (~7,5 %). Couleur :
+      <span style="color:#ef4444">■ ≥ 3×</span> &nbsp;
+      <span style="color:#f87171">■ 2–3×</span> &nbsp;
+      <span style="color:#fbbf24">■ 1–2×</span> &nbsp;
+      <span style="color:#4ade80">■ &lt; 1×</span>
+    </p>
+    <div class="ch h300"><canvas id="isrIndicBar"></canvas></div>
+  </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 6 — CHAÎNE PÉNALE
+════════════════════════════════════════════════════════════════════════ -->
+<div id="chaine" class="section">
+  <div class="section-title"><span>⛓️</span> Chaîne pénale — part des étrangers à chaque étape</div>
+  <div class="warn" style="margin-bottom:16px">
+    Les données de condamnations (2020) et d'incarcération (2017) sont antérieures aux données SSMSI (2024) en raison des délais de publication en open data.
+    La comparaison reste indicative de la tendance structurelle.
+  </div>
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>Part des étrangers de la population à l'incarcération</h3>
+      <p class="sub">La surreprésentation s'accroît à chaque étape du processus pénal. Le multiplicateur (×) est calculé par rapport aux 8,8 % de la population étrangère (INSEE 2024).</p>
+      <div class="ch h300"><canvas id="chainBar"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>ISR à chaque étape — visualisation comparative</h3>
+      <p class="sub">L'indice de surreprésentation croît de 1,0× (population) à 2,6× (personnes écrouées), illustrant le phénomène d'escalade dans la chaîne judiciaire.</p>
+      <div class="ch h300"><canvas id="chainISR"></canvas></div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <strong>Sources :</strong> SSMSI — Bases statistiques délinquance (data.gouv.fr) · Séries mensuelles 1996–2022 (PN+GN) ·
+  Caractéristiques victimes &amp; mis en cause par nationalité 2016–2025 ·
+  Casier judiciaire national — condamnations 2020 (SDSE/Ministère de la Justice) ·
+  DAP — Population écrouée janvier 2017 · INSEE Première n°2076 — Étrangers en France, 2024<br>
+  <em>Dashboard généré à partir des données ouvertes françaises — usage statistique uniquement</em>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// PALETTE
+// ─────────────────────────────────────────────────────────────────────────────
+const C = {
+  fr:    '#3b82f6',
+  frA:   'rgba(59,130,246,0.2)',
+  et:    '#ef4444',
+  etA:   'rgba(239,68,68,0.15)',
+  pop:   '#10b981',
+  popA:  'rgba(16,185,129,0.12)',
+  acc:   '#f59e0b',
+  grid:  '#1e3a5f',
+  muted: '#94a3b8',
+};
+
+Chart.defaults.color = C.muted;
+Chart.defaults.borderColor = C.grid;
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+Chart.defaults.font.size = 11;
+
+const baseOpts = (yLabel = '%') => ({
+  responsive: true, maintainAspectRatio: false,
+  interaction: { mode: 'index', intersect: false },
+  plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 10 } } } },
+  scales: {
+    x: { grid: { color: C.grid } },
+    y: { grid: { color: C.grid }, ticks: { callback: v => yLabel === '%' ? v + '%' : (v/1000).toFixed(0) + ' K' } }
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
+
+const years2000 = [2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021];
+
+const totalCrimes = [3849130,4163414,4218198,4078192,3935318,3892514,3866059,3733669,3698759,3670168,3611238,3600665,3570910,3609721,3651810,3684646,3687432,3715877,3721798,3838759,3389427,3666850];
+
+const catData = {
+  'Homicides & violences':        [194724,215950,235403,255957,265538,285725,309583,325048,344189,351732,354212,354613,362300,375487,404292,450902,463433,481798,521919,569266,572619,651294],
+  'Vols avec violence':           [114077,139097,137741,130119,123538,129823,131760,116795,110754,117066,126003,125881,129410,131102,120414,112119,107971,101623,93760,91836,75750,71670],
+  'Cambriolages':                 [399519,447560,461292,436682,404992,371694,360800,335927,320992,334872,339756,357227,376474,398232,390576,397352,402821,403131,375777,378978,318841,304930],
+  'Vols sans violence':           [1878494,2002493,1974197,1879617,1781341,1705612,1654259,1549362,1476378,1463285,1440316,1422833,1424314,1474755,1514538,1490068,1477950,1463289,1424838,1438017,1139010,1169585],
+  'Violences sexuelles':          [34495,36494,38652,41966,45189,42913,40988,40944,42028,40536,39711,42033,42945,43352,45832,49180,52103,56578,66007,73029,74850,93909],
+  'Stupéfiants':                  [103594,93790,110638,126985,141734,144997,156486,162492,184684,181365,180718,193026,196559,207550,213910,216862,216792,220943,220081,212939,189930,254397],
+  'Destructions & incendies':     [523837,582633,597033,549071,516447,544600,503347,471192,445376,419572,389078,350425,346871,334872,300657,277327,267949,272053,280703,287637,245074,247345],
+};
+
+const yearsSsmsi = [2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
+const mecFr = [5663381,5814343,5978301,5830711,5462292,6191396,6481579,6808886,7112963,7376334];
+const mecEt = [913334,1004450,1106540,1126481,1094981,1261934,1401238,1392729,1434227,1434022];
+const vicFr = [17796824,18184712,18190510,18608597,16604664,18123603,19903923,20428741,20407006,21139480];
+const vicEt = [2258639,2223787,2340594,2520305,2060352,2260929,2678680,2806498,2761353,2777092];
+
+const popPct = [6.6,6.8,7.0,7.2,7.3,7.5,7.8,8.2,8.8,8.8];
+const mecPctArr = [13.89,14.73,15.62,16.19,16.70,16.93,17.78,16.98,16.78,16.28];
+const vicPctArr = [11.26,10.90,11.40,11.93,11.04,11.09,11.86,12.08,11.92,11.61];
+const mecISR = mecPctArr.map((v,i) => +(v/popPct[i]).toFixed(2));
+const vicISR = vicPctArr.map((v,i) => +(v/popPct[i]).toFixed(2));
+
+const indicMec = [
+  { l: 'Cambriolages logement',             v: 34.3 },
+  { l: 'Vols dans les véhicules',           v: 31.4 },
+  { l: 'Vols violents sans arme',           v: 30.3 },
+  { l: 'Vols sans violence / personnes',    v: 28.1 },
+  { l: "Vols d'accessoires véhicules",      v: 20.1 },
+  { l: "Tentatives d'homicide",             v: 20.0 },
+  { l: 'Vols avec arme',                    v: 19.1 },
+  { l: 'Homicides',                         v: 17.8 },
+  { l: 'Trafic de stupéfiants',             v: 17.7 },
+  { l: 'Viol. physiques intra-familial',    v: 16.6 },
+  { l: 'Viol. physiques hors intra-fam.',   v: 14.4 },
+  { l: 'Viols et tentatives',               v: 14.4 },
+  { l: 'Escroqueries / fraudes',            v: 13.8 },
+  { l: 'Violences sexuelles',               v: 13.3 },
+  { l: 'Destructions & dégradations',       v: 11.5 },
+  { l: 'Usage de stupéfiants',              v: 11.3 },
+  { l: 'Vols de véhicule',                  v:  9.4 },
+];
+
+const indicVic = [
+  { l: "Tentatives d'homicide",             v: 20.7 },
+  { l: 'Homicides',                         v: 20.5 },
+  { l: 'Vols avec arme',                    v: 20.1 },
+  { l: 'Vols violents sans arme',           v: 17.6 },
+  { l: 'Vols sans violence / personnes',    v: 15.1 },
+  { l: 'Viol. physiques intra-familial',    v: 13.8 },
+  { l: 'Violences physiques',               v: 12.9 },
+  { l: 'Viol. physiques hors intra-fam.',   v: 12.1 },
+  { l: 'Vols dans les véhicules',           v: 10.8 },
+  { l: 'Vols de véhicule',                  v:  9.2 },
+  { l: 'Viols et tentatives',               v:  8.8 },
+  { l: 'Destructions & dégradations',       v:  8.5 },
+  { l: 'Escroqueries / fraudes',            v:  8.3 },
+  { l: 'Violences sexuelles',               v:  7.4 },
+  { l: "Vols d'accessoires véhicules",      v:  7.3 },
+  { l: 'Cambriolages logement',             v:  6.5 },
+];
+
+const chainePop  = 8.8;
+const chaineData = [
+  { l: 'Population (INSEE)',       v: 8.8,  c: '#10b981' },
+  { l: 'Mis en cause (2024)',      v: 16.78, c: '#ef4444' },
+  { l: 'Victimes (2024)',          v: 11.92, c: '#3b82f6' },
+  { l: 'Condamnés (2020)',         v: 15.7,  c: '#f59e0b' },
+  { l: 'Écrouées (2017)',          v: 20.2,  c: '#a855f7' },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TAUX PAR GROUPE — données (nb pour 1 000 habitants de chaque groupe)
+// Source : mecEt[i] / (popTot[i] × popPct[i]/100 × 1 000 000) × 1 000
+// ─────────────────────────────────────────────────────────────────────────────
+const mecRateFr = [90.5, 92.8, 95.4, 93.1, 87.0, 98.7, 103.4, 108.8, 114.0, 118.1];
+const mecRateEt = [206.5, 219.8, 234.5, 231.8, 221.6, 248.2, 264.2, 249.0, 238.3, 237.9];
+const vicRateFr = [284.4, 290.3, 290.2, 297.1, 264.6, 289.0, 317.5, 326.3, 327.1, 338.4];
+const vicRateEt = [510.8, 486.6, 496.1, 518.6, 416.9, 444.6, 505.0, 501.8, 458.8, 460.7];
+const mecRatio  = mecRateEt.map((v, i) => +(v / mecRateFr[i]).toFixed(2));
+const vicRatio  = vicRateEt.map((v, i) => +(v / vicRateFr[i]).toFixed(2));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHART 1 — Total crimes trend
+// ─────────────────────────────────────────────────────────────────────────────
+
+new Chart(document.getElementById('totalTrend'), {
+  type: 'line',
+  data: {
+    labels: years2000,
+    datasets: [{
+      label: 'Total crimes & délits',
+      data: totalCrimes,
+      borderColor: C.acc, backgroundColor: 'rgba(245,158,11,0.1)',
+      fill: true, tension: .4, pointRadius: 2.5, borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y.toLocaleString('fr')} faits` } }
+    },
+    scales: {
+      x: { grid: { color: C.grid } },
+      y: { min: 2500000, max: 4500000, grid: { color: C.grid }, ticks: { callback: v => (v/1000000).toFixed(1) + ' M' } }
+    }
+  }
+});
+
+const catColors = ['#f87171','#fb923c','#fbbf24','#60a5fa','#a78bfa','#34d399','#94a3b8'];
+new Chart(document.getElementById('catTrend'), {
+  type: 'line',
+  data: {
+    labels: years2000,
+    datasets: Object.entries(catData).map(([label, data], i) => ({
+      label, data, borderColor: catColors[i], backgroundColor: 'transparent',
+      tension: .4, pointRadius: 1.5, borderWidth: 1.8,
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 10, padding: 8, font: { size: 9 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('fr')}` } }
+    },
+    scales: {
+      x: { grid: { color: C.grid } },
+      y: { grid: { color: C.grid }, ticks: { callback: v => (v/1000).toFixed(0) + ' K' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('mecAbs'), {
+  type: 'bar',
+  data: {
+    labels: yearsSsmsi,
+    datasets: [
+      { label: 'Mis en cause français',  data: mecFr, backgroundColor: 'rgba(59,130,246,0.75)', stack: 's' },
+      { label: 'Mis en cause étrangers', data: mecEt, backgroundColor: 'rgba(239,68,68,0.80)',  stack: 's' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 10 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('fr')}`,
+          afterBody: items => {
+            const tot = items.reduce((s, i) => s + i.parsed.y, 0);
+            const et = items.find(i => i.dataset.label.includes('trang'));
+            if (et) return [`Part étrangers : ${(100*et.parsed.y/tot).toFixed(1)}%`];
+          }
+        }
+      }
+    },
+    scales: {
+      x: { stacked: true, grid: { color: C.grid } },
+      y: { stacked: true, grid: { color: C.grid }, ticks: { callback: v => (v/1000000).toFixed(1) + ' M' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('vicAbs'), {
+  type: 'bar',
+  data: {
+    labels: yearsSsmsi,
+    datasets: [
+      { label: 'Victimes françaises',  data: vicFr, backgroundColor: 'rgba(59,130,246,0.65)', stack: 's' },
+      { label: 'Victimes étrangères',  data: vicEt, backgroundColor: 'rgba(239,68,68,0.75)',  stack: 's' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 10 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('fr')}`,
+          afterBody: items => {
+            const tot = items.reduce((s, i) => s + i.parsed.y, 0);
+            const et = items.find(i => i.dataset.label.includes('trang'));
+            if (et) return [`Part étrangers : ${(100*et.parsed.y/tot).toFixed(1)}%`];
+          }
+        }
+      }
+    },
+    scales: {
+      x: { stacked: true, grid: { color: C.grid } },
+      y: { stacked: true, grid: { color: C.grid }, ticks: { callback: v => (v/1000000).toFixed(0) + ' M' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('mecTaux'), {
+  type: 'line',
+  data: {
+    labels: yearsSsmsi,
+    datasets: [
+      { label: 'MEC pour 1 000 Français',   data: mecRateFr, borderColor: C.fr, backgroundColor: C.frA, fill: true, tension: .4, pointRadius: 4, borderWidth: 2.5 },
+      { label: 'MEC pour 1 000 étrangers',  data: mecRateEt, borderColor: C.et, backgroundColor: C.etA, fill: true, tension: .4, pointRadius: 4, borderWidth: 2.5 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 10 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} ‰` } }
+    },
+    scales: {
+      x: { grid: { color: C.grid } },
+      y: { min: 0, max: 320, grid: { color: C.grid }, ticks: { callback: v => v + ' ‰' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('vicTaux'), {
+  type: 'line',
+  data: {
+    labels: yearsSsmsi,
+    datasets: [
+      { label: 'Victimes pour 1 000 Français',  data: vicRateFr, borderColor: C.fr, backgroundColor: C.frA, fill: true, tension: .4, pointRadius: 4, borderWidth: 2.5 },
+      { label: 'Victimes pour 1 000 étrangers', data: vicRateEt, borderColor: C.et, backgroundColor: C.etA, fill: true, tension: .4, pointRadius: 4, borderWidth: 2.5 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 10 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} ‰` } }
+    },
+    scales: {
+      x: { grid: { color: C.grid } },
+      y: { min: 0, max: 620, grid: { color: C.grid }, ticks: { callback: v => v + ' ‰' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('tauxComp2024'), {
+  type: 'bar',
+  data: {
+    labels: ['Mis en cause (2024)', 'Victimes (2024)'],
+    datasets: [
+      { label: 'Français',   data: [114.0, 327.1], backgroundColor: 'rgba(59,130,246,0.75)', borderColor: C.fr, borderWidth: 2, borderRadius: 5 },
+      { label: 'Étrangers',  data: [238.3, 458.8], backgroundColor: 'rgba(239,68,68,0.75)',  borderColor: C.et, borderWidth: 2, borderRadius: 5 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 10 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} pour 1 000 hab.` } }
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { min: 0, max: 580, grid: { color: C.grid }, ticks: { callback: v => v + ' ‰' } }
+    }
+  },
+  plugins: [{
+    afterDraw(chart) {
+      const { ctx } = chart;
+      const m0 = chart.getDatasetMeta(0), m1 = chart.getDatasetMeta(1);
+      ctx.save();
+      [[0,114.0,238.3],[1,327.1,458.8]].forEach(([gi,fr,et]) => {
+        const b0 = m0.data[gi], b1 = m1.data[gi];
+        ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 13px Segoe UI'; ctx.textAlign = 'center';
+        ctx.fillText('×' + (et/fr).toFixed(2), (b0.x+b1.x)/2, Math.min(b0.y,b1.y)-18);
+      });
+      ctx.restore();
+    }
+  }]
+});
+
+new Chart(document.getElementById('ratioTaux'), {
+  type: 'line',
+  data: {
+    labels: yearsSsmsi,
+    datasets: [
+      { label: 'Ratio MEC (taux étrangers ÷ taux français)',     data: mecRatio, borderColor: C.et, backgroundColor: 'rgba(239,68,68,0.12)',   fill: true, tension: .4, pointRadius: 4, borderWidth: 2.5 },
+      { label: 'Ratio victimes (taux étrangers ÷ taux français)', data: vicRatio, borderColor: C.fr, backgroundColor: 'rgba(59,130,246,0.12)', fill: true, tension: .4, pointRadius: 4, borderWidth: 2.5 },
+      { label: 'Égalité (ratio = 1,0×)', data: yearsSsmsi.map(()=>1.0), borderColor: C.acc, borderDash: [8,4], borderWidth: 1.5, fill: false, pointRadius: 0 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 10 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}×` } }
+    },
+    scales: {
+      x: { grid: { color: C.grid } },
+      y: { min: 0, max: 3.2, grid: { color: C.grid }, ticks: { callback: v => v.toFixed(1)+'×' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('mecPct'), {
+  type: 'line',
+  data: {
+    labels: yearsSsmsi,
+    datasets: [
+      { label: '% étrangers parmi les MEC',                     data: mecPctArr, borderColor: C.et, backgroundColor: C.etA, fill: true, tension: .35, pointRadius: 4, borderWidth: 2.5 },
+      { label: '% étrangers dans la population (INSEE)', data: popPct,    borderColor: C.pop, backgroundColor: 'transparent', fill: false, tension: .35, pointRadius: 3, borderWidth: 2, borderDash: [6,3] }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 10 } } } },
+    scales: { x: { grid: { color: C.grid } }, y: { min: 0, max: 22, grid: { color: C.grid }, ticks: { callback: v => v+'%' } } }
+  }
+});
+
+new Chart(document.getElementById('vicPct'), {
+  type: 'line',
+  data: {
+    labels: yearsSsmsi,
+    datasets: [
+      { label: '% étrangers parmi les victimes',                data: vicPctArr, borderColor: C.fr, backgroundColor: C.frA, fill: true, tension: .35, pointRadius: 4, borderWidth: 2.5 },
+      { label: '% étrangers dans la population (INSEE)', data: popPct,    borderColor: C.pop, backgroundColor: 'transparent', fill: false, tension: .35, pointRadius: 3, borderWidth: 2, borderDash: [6,3] }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 10 } } } },
+    scales: { x: { grid: { color: C.grid } }, y: { min: 0, max: 18, grid: { color: C.grid }, ticks: { callback: v => v+'%' } } }
+  }
+});
+
+new Chart(document.getElementById('isrTrend'), {
+  type: 'line',
+  data: {
+    labels: yearsSsmsi,
+    datasets: [
+      { label: 'ISR Mis en cause', data: mecISR, borderColor: C.et, backgroundColor: C.etA, fill: true, tension: .35, pointRadius: 4, borderWidth: 2.5 },
+      { label: 'ISR Victimes',     data: vicISR, borderColor: C.fr, backgroundColor: C.frA, fill: true, tension: .35, pointRadius: 4, borderWidth: 2.5 },
+      { label: 'Référence proportionnelle (ISR = 1,0×)', data: yearsSsmsi.map(()=>1.0), borderColor: C.acc, backgroundColor: 'transparent', fill: false, borderDash: [8,4], borderWidth: 1.5, pointRadius: 0 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 10 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}×` } }
+    },
+    scales: { x: { grid: { color: C.grid } }, y: { min: 0, max: 3, grid: { color: C.grid }, ticks: { callback: v => v.toFixed(1)+'×' } } }
+  }
+});
+
+function hBarPlugin(avgVal, avgColor, avgLabel, popVal, popColor, popLabel) {
+  return {
+    id: 'refLines',
+    afterDraw(chart) {
+      const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+      ctx.save();
+      [[avgVal, avgColor, avgLabel],[popVal, popColor, popLabel]].forEach(([val, color, label]) => {
+        const px = x.getPixelForValue(val);
+        ctx.beginPath(); ctx.moveTo(px, top); ctx.lineTo(px, bottom);
+        ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.setLineDash([5,3]); ctx.stroke();
+        ctx.fillStyle = color; ctx.font = '9px Segoe UI'; ctx.textAlign = 'left';
+        ctx.fillText(label, px+3, top+11);
+      });
+      ctx.restore();
+    }
+  };
+}
+
+new Chart(document.getElementById('mecIndicBar'), {
+  type: 'bar',
+  data: {
+    labels: indicMec.map(d => d.l),
+    datasets: [{ label: '% étrangers', data: indicMec.map(d => d.v),
+      backgroundColor: indicMec.map(d => d.v >= 17 ? 'rgba(239,68,68,0.8)' : 'rgba(239,68,68,0.45)'),
+      borderColor: indicMec.map(d => d.v >= 17 ? '#ef4444' : '#991b1b'), borderWidth: 1, borderRadius: 3 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x.toFixed(1)}% étrangers` } } },
+    scales: { x: { min:0, max:40, grid:{color:C.grid}, ticks:{callback:v=>v+'%'} }, y: { grid:{display:false}, ticks:{font:{size:10}} } }
+  },
+  plugins: [hBarPlugin(17.0,'#ef4444','moy. 17%',7.5,'#10b981','pop. 7,5%')]
+});
+
+new Chart(document.getElementById('vicIndicBar'), {
+  type: 'bar',
+  data: {
+    labels: indicVic.map(d => d.l),
+    datasets: [{ label: '% étrangers', data: indicVic.map(d => d.v),
+      backgroundColor: indicVic.map(d => d.v >= 11.6 ? 'rgba(59,130,246,0.8)' : 'rgba(59,130,246,0.45)'),
+      borderColor: indicVic.map(d => d.v >= 11.6 ? '#3b82f6' : '#1d4ed8'), borderWidth: 1, borderRadius: 3 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x.toFixed(1)}% étrangers` } } },
+    scales: { x: { min:0, max:26, grid:{color:C.grid}, ticks:{callback:v=>v+'%'} }, y: { grid:{display:false}, ticks:{font:{size:10}} } }
+  },
+  plugins: [hBarPlugin(11.6,'#3b82f6','moy. 11,6%',7.5,'#10b981','pop. 7,5%')]
+});
+
+const popRefAvg = 7.5;
+const isrMec = indicMec.map(d => +(d.v / popRefAvg).toFixed(2));
+const isrColors = isrMec.map(v => v>=3?'#ef4444':v>=2?'#f87171':v>=1?'#fbbf24':'#4ade80');
+
+new Chart(document.getElementById('isrIndicBar'), {
+  type: 'bar',
+  data: {
+    labels: indicMec.map(d => d.l),
+    datasets: [{ label: 'ISR', data: isrMec,
+      backgroundColor: isrColors.map(c => c+'bb'), borderColor: isrColors, borderWidth: 1, borderRadius: 3 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ISR = ${ctx.parsed.x.toFixed(2)}×` } } },
+    scales: { x: { min:0, max:5, grid:{color:C.grid}, ticks:{callback:v=>v+'×'} }, y: { grid:{display:false}, ticks:{font:{size:10}} } }
+  },
+  plugins: [{
+    afterDraw(chart) {
+      const { ctx, chartArea:{top,bottom}, scales:{x} } = chart;
+      const px = x.getPixelForValue(1.0);
+      ctx.save();
+      ctx.beginPath(); ctx.moveTo(px,top); ctx.lineTo(px,bottom);
+      ctx.strokeStyle='#f59e0b'; ctx.lineWidth=2; ctx.setLineDash([6,3]); ctx.stroke();
+      ctx.fillStyle='#fcd34d'; ctx.font='bold 9px Segoe UI';
+      ctx.fillText('proportionnel (1×)',px+3,top+11);
+      ctx.restore();
+    }
+  }]
+});
+
+new Chart(document.getElementById('chainBar'), {
+  type: 'bar',
+  data: {
+    labels: chaineData.map(d => d.l),
+    datasets: [{ label: '% étrangers', data: chaineData.map(d=>d.v),
+      backgroundColor: chaineData.map(d=>d.c+'cc'), borderColor: chaineData.map(d=>d.c), borderWidth:2, borderRadius:6 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y.toFixed(1)}% étrangers`}} },
+    scales: { x:{grid:{display:false}}, y:{min:0,max:24,grid:{color:C.grid},ticks:{callback:v=>v+'%'}} }
+  },
+  plugins: [{
+    afterDraw(chart) {
+      const { ctx, chartArea:{left,right}, scales:{y} } = chart;
+      const yRef = y.getPixelForValue(8.8);
+      ctx.save();
+      ctx.beginPath(); ctx.moveTo(left,yRef); ctx.lineTo(right,yRef);
+      ctx.strokeStyle='#10b981'; ctx.lineWidth=1.5; ctx.setLineDash([6,4]); ctx.stroke();
+      ctx.fillStyle='#6ee7b7'; ctx.font='9px Segoe UI'; ctx.textAlign='left';
+      ctx.fillText('pop. étrangère 8,8%',left+5,yRef-4);
+      const meta = chart.getDatasetMeta(0);
+      ctx.setLineDash([]);
+      meta.data.forEach((bar,i) => {
+        if(i===0) return;
+        ctx.fillStyle='#f1f5f9'; ctx.font='bold 12px Segoe UI'; ctx.textAlign='center';
+        ctx.fillText('×'+(chaineData[i].v/8.8).toFixed(1), bar.x, bar.y-7);
+      });
+      ctx.restore();
+    }
+  }]
+});
+
+new Chart(document.getElementById('chainISR'), {
+  type: 'line',
+  data: {
+    labels: chaineData.map(d => d.l),
+    datasets: [
+      {
+        label: 'ISR à chaque étape',
+        data: chaineData.map(d => +(d.v/8.8).toFixed(2)),
+        borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.15)',
+        fill: true, tension: .4, pointRadius: 6, pointHoverRadius: 8,
+        pointBackgroundColor: chaineData.map(d=>d.c), pointBorderColor:'#fff', pointBorderWidth:2, borderWidth:2.5,
+      },
+      {
+        label: 'Référence proportionnelle (ISR = 1,0×)',
+        data: chaineData.map(()=>1.0),
+        borderColor: C.acc, borderDash:[8,4], borderWidth:1.5, fill:false, pointRadius:0,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position:'bottom', labels:{boxWidth:12,padding:12,font:{size:10}} },
+      tooltip: { callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}×`} }
+    },
+    scales: { x:{grid:{display:false}}, y:{min:0,max:3.2,grid:{color:C.grid},ticks:{callback:v=>v.toFixed(1)+'×'}} }
+  }
+});
+</script>
+</body>
+</html>
+

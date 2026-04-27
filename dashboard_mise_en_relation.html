@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mise en relation : Flux Immigration × Criminalité — France 2016-2024</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --hdr: #0f1729;
+      --accent: #3b82f6;
+      --accent2: #f59e0b;
+      --accent3: #10b981;
+      --red: #ef4444;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --gap: 16px;
+      --r: 10px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:var(--bg); color:var(--text); font-size:14px; }
+    .wrap { max-width:1440px; margin:0 auto; padding:var(--gap); }
+
+    /* HEADER */
+    .hdr {
+      background: linear-gradient(135deg, #0f1729 0%, #1e3a5f 100%);
+      color:#fff; border-radius:var(--r); padding:22px 28px;
+      margin-bottom:var(--gap); display:flex; justify-content:space-between;
+      align-items:flex-start; flex-wrap:wrap; gap:12px;
+    }
+    .hdr h1 { font-size:18px; font-weight:700; margin-bottom:4px; }
+    .hdr .sub { font-size:12px; opacity:.65; line-height:1.6; }
+    .badge-note {
+      background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.4);
+      color:#fca5a5; font-size:11px; padding:6px 12px; border-radius:6px;
+      max-width:400px; line-height:1.5;
+    }
+
+    /* KPI ROW */
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:var(--gap); margin-bottom:var(--gap); }
+    .kpi { background:var(--card); border-radius:var(--r); padding:16px 20px; box-shadow:0 1px 3px rgba(0,0,0,.07); border-top:3px solid var(--accent); }
+    .kpi.amber { border-top-color: var(--accent2); }
+    .kpi.green { border-top-color: var(--accent3); }
+    .kpi.red   { border-top-color: var(--red); }
+    .kpi-lbl { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:4px; }
+    .kpi-val { font-size:26px; font-weight:800; line-height:1; }
+    .kpi-sub { font-size:11px; color:var(--muted); margin-top:5px; line-height:1.4; }
+
+    /* GRIDS */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); margin-bottom:var(--gap); }
+    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); margin-bottom:var(--gap); }
+    .card { background:var(--card); border-radius:var(--r); padding:20px 22px; box-shadow:0 1px 3px rgba(0,0,0,.07); }
+    .card.span2 { grid-column: span 2; }
+    .card.span3 { grid-column: span 3; }
+    .card-title { font-size:13px; font-weight:700; margin-bottom:3px; }
+    .card-hint { font-size:11px; color:var(--muted); margin-bottom:14px; line-height:1.5; }
+    .cw { position:relative; height:260px; }
+    .cw.tall { height:340px; }
+    .cw.xtall { height:420px; }
+
+    /* ANNOTATION BADGE */
+    .anno { display:inline-block; background:#fef3c7; border:1px solid #fcd34d; color:#92400e; font-size:11px; padding:3px 8px; border-radius:4px; margin-top:6px; }
+
+    /* FOOTER */
+    footer { font-size:11px; color:var(--muted); text-align:center; padding:14px 0 22px; line-height:1.8; }
+
+    @media(max-width:1000px) { .grid-2,.grid-3 { grid-template-columns:1fr; } .card.span2,.card.span3 { grid-column:1; } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <h1>Mise en relation — Flux Immigration × Criminalité (2016-2024)</h1>
+    <div class="sub">
+      Source criminalité : SSMSI MEC (mis en cause, nationalité Française/Étrangère) ·
+      Source immigration : DSED/MIOM titres de séjour (pays tiers hors UK) ·
+      Source population : INSEE Figure 2 (% étrangers)
+    </div>
+  </div>
+  <div class="badge-note">
+    ⚠ Corrélation ≠ causalité. N=8 paires annuelles seulement.<br>
+    Variables confondantes non contrôlées (conjoncture, politique policière, etc.)
+  </div>
+</div>
+
+<!-- KPI ROW -->
+<div class="kpi-row" id="kpi-row">
+  <div class="kpi red">
+    <div class="kpi-lbl">Corrélation flux → MEC t+1</div>
+    <div class="kpi-val">r = +0,85</div>
+    <div class="kpi-sub">p = 0,016 · sans 2020 covid (N=7)<br>r = +0,66 avec 2020 (p=0,075)</div>
+  </div>
+  <div class="kpi red">
+    <div class="kpi-lbl">Taux MEC étrangers 2024</div>
+    <div class="kpi-val">30,0‰</div>
+    <div class="kpi-sub">Pour 1 000 habitants étrangers<br>+4,4 pts vs 2016 (25,6‰)</div>
+  </div>
+  <div class="kpi amber">
+    <div class="kpi-lbl">Taux MEC Français 2024</div>
+    <div class="kpi-val">14,4‰</div>
+    <div class="kpi-sub">Pour 1 000 habitants français<br>+2,8 pts vs 2016 (11,6‰)</div>
+  </div>
+  <div class="kpi red">
+    <div class="kpi-lbl">Ratio taux étr. / taux fr.</div>
+    <div class="kpi-val">×2,08</div>
+    <div class="kpi-sub">En 2024 · pic ×2,55 en 2022<br>×2,20 en 2016</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-lbl">Flux titres de séjour 2023</div>
+    <div class="kpi-val">327k</div>
+    <div class="kpi-sub">Pays tiers, hors UK<br>+38 % vs 2016 (237k)</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-lbl">% étrangers dans la pop.</div>
+    <div class="kpi-val">8,8 %</div>
+    <div class="kpi-sub">INSEE 2024<br>+2,0 pts vs 2016 (6,8 %)</div>
+  </div>
+</div>
+
+<!-- ROW 1 : Dual-axis flux/MEC + Scatter laggé -->
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Flux immigration & MEC étrangers — évolution parallèle</div>
+    <div class="card-hint">Barres = premiers titres de séjour délivrés (axe gauche) · Ligne = total MEC étrangers agrégé (axe droit) · L'écart 2020 reflète le covid</div>
+    <div class="cw"><canvas id="cDual"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Corrélation décalée : flux t → MEC total t+1</div>
+    <div class="card-hint">Chaque point = une année · Axe X = flux titres de séjour · Axe Y = MEC étrangers agrégé l'année suivante · Droite = régression OLS</div>
+    <div class="cw"><canvas id="cScatter"></canvas></div>
+    <div class="anno" id="anno-corr"></div>
+  </div>
+</div>
+
+<!-- ROW 2 : Taux comparatif + Indice base 100 -->
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Taux de MEC pour 1 000 habitants — Étrangers vs Français</div>
+    <div class="card-hint">Somme indicative des 17 types d'infractions · Axe droit = ratio (taux étrangers / taux français)</div>
+    <div class="cw"><canvas id="cTaux"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Indice base 100 en 2016 — flux immigration, résidents étrangers, MEC étrangers</div>
+    <div class="card-hint">Permet de comparer les vitesses d'évolution relatives sur la même échelle · 2016 = 100 pour chaque série</div>
+    <div class="cw"><canvas id="cBase100"></canvas></div>
+  </div>
+</div>
+
+<!-- ROW 3 : Corrélations par indicateur + % pop vs % MEC -->
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Corrélation flux t → MEC par type d'infraction t+1 (r de Pearson)</div>
+    <div class="card-hint">N=8 paires · Rouge = corrélation positive significative (p&lt;0,05) · Bleu = négative · Gris = non significatif</div>
+    <div class="cw xtall"><canvas id="cCorr"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">% MEC étrangers vs % étrangers dans la population — par année</div>
+    <div class="card-hint">Si les barres bleues (% MEC) dépassent nettement les barres oranges (% pop), l'ISR est &gt; 1 · Filtre par indicateur ci-dessous</div>
+    <div style="margin-bottom:10px">
+      <select id="sel-ind" onchange="updatePctChart()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;width:100%;max-width:420px"></select>
+    </div>
+    <div class="cw tall"><canvas id="cPct"></canvas></div>
+  </div>
+</div>
+
+<!-- ROW 4 : Décomposition croissance MEC par motif -->
+<div class="grid-2">
+  <div class="card span2">
+    <div class="card-title">Évolution du nombre de MEC étrangers par type d'infraction — base 100 en 2016</div>
+    <div class="card-hint">Infractions dont le nombre de MEC étrangers a le plus crû relativement à leur niveau de 2016 · Filtre via légende</div>
+    <div class="cw tall"><canvas id="cGrowth"></canvas></div>
+  </div>
+</div>
+
+<footer>
+  Données MEC : SSMSI 2016-2025 · Filtre appliqué : sexe=Ensemble, âge=Ensemble, majorité=Ensemble ·
+  Flux immigration : DSED/MIOM premiers titres de séjour pays tiers hors Britanniques (2011-2023) ·
+  Population étrangère : INSEE Tableau Figure 2 ·
+  Corrélation de Pearson calculée sur 8 paires annuelles (2016-2023 → 2017-2024) ·
+  ⚠ Résultats descriptifs — aucune causalité établie
+</footer>
+
+</div><!-- /wrap -->
+
+<script>
+// ─── DONNÉES ──────────────────────────────────────────────────────────────────
+
+const FLUX = {
+  2016: 237210, 2017: 254628, 2018: 267421, 2019: 287503,
+  2020: 229388, 2021: 282772, 2022: 318926, 2023: 326954
+};
+
+// Total MEC étrangers agrégé (somme 17 indicateurs)
+const MEC_ET = {
+  2016: 116108, 2017: 127342, 2018: 140236, 2019: 143819,
+  2020: 139721, 2021: 161417, 2022: 177355, 2023: 176795, 2024: 180532
+};
+
+// Total MEC Français agrégé
+const MEC_FR = {
+  2016: 760823, 2017: 779564, 2018: 801530, 2019: 793200,
+  2020: 703696, 2021: 822765, 2022: 883892, 2023: 889823, 2024: 951072
+};
+
+// Nb étrangers résidents
+const NB_ET_RES = {
+  2016: 4535124, 2017: 4687620, 2018: 4837392, 2019: 4989228,
+  2020: 5138512, 2021: 5221601, 2022: 5307276, 2023: 5606586, 2024: 6019904
+};
+// Pop totale France
+const POP_FR_TOT = {
+  2016: 66693000, 2017: 66966000, 2018: 67186000, 2019: 67422000,
+  2020: 67612000, 2021: 67813000, 2022: 68042000, 2023: 68373000, 2024: 68408000
+};
+
+// Corrélations r Pearson flux t → MEC infraction t+1 (N=8)
+const CORR_DATA = [
+  { ind: "Vols de véhicule",                                   r: +0.797, p: 0.0178, sig: true  },
+  { ind: "Vols dans les véhicules",                            r: +0.781, p: 0.0223, sig: true  },
+  { ind: "Homicides",                                          r: +0.761, p: 0.0283, sig: true  },
+  { ind: "Trafic de stupéfiants",                              r: +0.759, p: 0.0291, sig: true  },
+  { ind: "Violences physiques hors cadre intra-familial",      r: +0.738, p: 0.0368, sig: true  },
+  { ind: "Viols et tentatives de viols",                       r: +0.709, p: 0.0491, sig: true  },
+  { ind: "Violences sexuelles",                                r: +0.708, p: 0.0496, sig: true  },
+  { ind: "Tentatives d'homicide",                              r: +0.704, p: 0.0512, sig: false },
+  { ind: "Usage de stupéfiants",                               r: +0.647, p: 0.0828, sig: false },
+  { ind: "Violences physiques intra-familial",                 r: +0.666, p: 0.0714, sig: false },
+  { ind: "Destructions et dégradations volontaires",           r: +0.489, p: 0.2183, sig: false },
+  { ind: "Vols avec arme",                                     r: +0.070, p: 0.8683, sig: false },
+  { ind: "Vols sans violence contre des personnes",            r: -0.128, p: 0.7619, sig: false },
+  { ind: "Vols d'accessoires sur les véhicules",               r: -0.211, p: 0.6167, sig: false },
+  { ind: "Cambriolages de logement",                           r: -0.285, p: 0.4940, sig: false },
+  { ind: "Vols violents sans arme",                            r: -0.528, p: 0.1783, sig: false },
+  { ind: "Escroqueries et fraudes",                            r: -0.719, p: 0.0446, sig: true  },
+];
+CORR_DATA.sort((a, b) => a.r - b.r);
+
+// ISR dataset complet
+const ISR_SERIES = {
+  "Cambriolages de logement": [{a:2016,isr:3.825,pm:26.01,pp:6.8,ne:11118,nt:42749},{a:2017,isr:3.949,pm:27.64,pp:7.0,ne:11883,nt:42997},{a:2018,isr:4.697,pm:33.82,pp:7.2,ne:14990,nt:44320},{a:2019,isr:4.295,pm:31.78,pp:7.4,ne:12878,nt:40525},{a:2020,isr:4.745,pm:36.06,pp:7.6,ne:12670,nt:35134},{a:2021,isr:5.19,pm:39.96,pp:7.7,ne:12899,nt:32280},{a:2022,isr:5.309,pm:41.41,pp:7.8,ne:12895,nt:31140},{a:2023,isr:4.64,pm:38.05,pp:8.2,ne:12548,nt:32977},{a:2024,isr:4.26,pm:37.49,pp:8.8,ne:12030,nt:32087}],
+  "Destructions et dégradations volontaires": [{a:2016,isr:1.44,pm:9.79,pp:6.8,ne:7658,nt:78211},{a:2017,isr:1.329,pm:9.3,pp:7.0,ne:7812,nt:84000},{a:2018,isr:1.443,pm:10.39,pp:7.2,ne:8957,nt:86237},{a:2019,isr:1.501,pm:11.11,pp:7.4,ne:9657,nt:86942},{a:2020,isr:1.549,pm:11.77,pp:7.6,ne:9277,nt:78796},{a:2021,isr:1.582,pm:12.18,pp:7.7,ne:9175,nt:75352},{a:2022,isr:1.64,pm:12.79,pp:7.8,ne:9194,nt:71869},{a:2023,isr:1.561,pm:12.8,pp:8.2,ne:9689,nt:75694},{a:2024,isr:1.45,pm:12.76,pp:8.8,ne:9066,nt:71054}],
+  "Escroqueries et fraudes": [{a:2016,isr:2.065,pm:14.04,pp:6.8,ne:8985,nt:63984},{a:2017,isr:2.02,pm:14.14,pp:7.0,ne:9109,nt:64412},{a:2018,isr:1.792,pm:12.9,pp:7.2,ne:7874,nt:61048},{a:2019,isr:1.769,pm:13.09,pp:7.4,ne:7938,nt:60656},{a:2020,isr:1.688,pm:12.83,pp:7.6,ne:6757,nt:52669},{a:2021,isr:1.856,pm:14.29,pp:7.7,ne:7997,nt:55943},{a:2022,isr:1.937,pm:15.11,pp:7.8,ne:7700,nt:50973},{a:2023,isr:1.902,pm:15.6,pp:8.2,ne:7841,nt:50277},{a:2024,isr:1.482,pm:13.04,pp:8.8,ne:6194,nt:47501}],
+  "Homicides": [{a:2016,isr:null,pm:null,pp:6.8,ne:null,nt:986},{a:2017,isr:2.11,pm:14.77,pp:7.0,ne:166,nt:1124},{a:2018,isr:2.426,pm:17.47,pp:7.2,ne:210,nt:1202},{a:2019,isr:2.489,pm:18.42,pp:7.4,ne:207,nt:1124},{a:2020,isr:2.458,pm:18.68,pp:7.6,ne:201,nt:1076},{a:2021,isr:2.399,pm:18.47,pp:7.7,ne:217,nt:1175},{a:2022,isr:2.276,pm:17.75,pp:7.8,ne:241,nt:1358},{a:2023,isr:2.12,pm:17.38,pp:8.2,ne:248,nt:1427},{a:2024,isr:2.033,pm:17.89,pp:8.8,ne:259,nt:1448}],
+  "Tentatives d'homicide": [{a:2016,isr:2.751,pm:18.71,pp:6.8,ne:350,nt:1871},{a:2017,isr:2.796,pm:19.57,pp:7.0,ne:423,nt:2162},{a:2018,isr:2.703,pm:19.46,pp:7.2,ne:451,nt:2318},{a:2019,isr:2.638,pm:19.52,pp:7.4,ne:467,nt:2393},{a:2020,isr:2.804,pm:21.31,pp:7.6,ne:556,nt:2609},{a:2021,isr:2.618,pm:20.16,pp:7.7,ne:565,nt:2802},{a:2022,isr:2.776,pm:21.65,pp:7.8,ne:671,nt:3099},{a:2023,isr:2.209,pm:18.11,pp:8.2,ne:627,nt:3462},{a:2024,isr:2.226,pm:19.59,pp:8.8,ne:664,nt:3390}],
+  "Trafic de stupéfiants": [{a:2016,isr:1.806,pm:12.28,pp:6.8,ne:5001,nt:40719},{a:2017,isr:1.901,pm:13.31,pp:7.0,ne:5852,nt:43976},{a:2018,isr:2.111,pm:15.2,pp:7.2,ne:6911,nt:45476},{a:2019,isr:2.119,pm:15.68,pp:7.4,ne:7378,nt:47059},{a:2020,isr:1.98,pm:15.05,pp:7.6,ne:6202,nt:41197},{a:2021,isr:2.158,pm:16.62,pp:7.7,ne:7763,nt:46712},{a:2022,isr:2.479,pm:19.34,pp:7.8,ne:9481,nt:49012},{a:2023,isr:2.495,pm:20.46,pp:8.2,ne:9981,nt:48790},{a:2024,isr:2.459,pm:21.64,pp:8.8,ne:11324,nt:52325}],
+  "Usage de stupéfiants": [{a:2016,isr:1.268,pm:8.62,pp:6.8,ne:15720,nt:182430},{a:2017,isr:1.324,pm:9.27,pp:7.0,ne:17511,nt:188802},{a:2018,isr:1.421,pm:10.23,pp:7.2,ne:19115,nt:186901},{a:2019,isr:1.458,pm:10.79,pp:7.4,ne:19136,nt:177423},{a:2020,isr:1.418,pm:10.78,pp:7.6,ne:17336,nt:160827},{a:2021,isr:1.487,pm:11.45,pp:7.7,ne:25350,nt:221372},{a:2022,isr:1.638,pm:12.78,pp:7.8,ne:32147,nt:251629},{a:2023,isr:1.379,pm:11.31,pp:8.2,ne:29736,nt:262871},{a:2024,isr:1.426,pm:12.55,pp:8.8,ne:36487,nt:290776}],
+  "Violences physiques intra-familial": [{a:2016,isr:2.409,pm:16.38,pp:6.8,ne:15787,nt:96392},{a:2017,isr:2.38,pm:16.66,pp:7.0,ne:16529,nt:99234},{a:2018,isr:2.285,pm:16.45,pp:7.2,ne:17583,nt:106902},{a:2019,isr:2.241,pm:16.58,pp:7.4,ne:20052,nt:120950},{a:2020,isr:2.145,pm:16.3,pp:7.6,ne:22503,nt:138026},{a:2021,isr:2.206,pm:16.99,pp:7.7,ne:27915,nt:164256},{a:2022,isr:2.204,pm:17.19,pp:7.8,ne:30951,nt:180057},{a:2023,isr:2.048,pm:16.79,pp:8.2,ne:32739,nt:195000},{a:2024,isr:1.853,pm:16.31,pp:8.8,ne:32287,nt:197954}],
+  "Violences physiques hors cadre": [{a:2016,isr:1.824,pm:12.4,pp:6.8,ne:15727,nt:126881},{a:2017,isr:1.817,pm:12.72,pp:7.0,ne:16597,nt:130463},{a:2018,isr:1.856,pm:13.36,pp:7.2,ne:18778,nt:140508},{a:2019,isr:1.849,pm:13.68,pp:7.4,ne:18694,nt:136623},{a:2020,isr:1.918,pm:14.58,pp:7.6,ne:18408,nt:126220},{a:2021,isr:1.884,pm:14.51,pp:7.7,ne:19327,nt:133195},{a:2022,isr:2.045,pm:15.95,pp:7.8,ne:20919,nt:131188},{a:2023,isr:1.922,pm:15.76,pp:8.2,ne:21675,nt:137540},{a:2024,isr:1.744,pm:15.35,pp:8.8,ne:20942,nt:136407}],
+  "Violences sexuelles": [{a:2016,isr:1.943,pm:13.21,pp:6.8,ne:5052,nt:38250},{a:2017,isr:1.953,pm:13.67,pp:7.0,ne:5631,nt:41195},{a:2018,isr:1.943,pm:13.99,pp:7.2,ne:6643,nt:47480},{a:2019,isr:1.865,pm:13.8,pp:7.4,ne:7048,nt:51090},{a:2020,isr:1.725,pm:13.11,pp:7.6,ne:6882,nt:52505},{a:2021,isr:1.684,pm:12.97,pp:7.7,ne:8491,nt:65480},{a:2022,isr:1.699,pm:13.25,pp:7.8,ne:9313,nt:70298},{a:2023,isr:1.573,pm:12.9,pp:8.2,ne:9877,nt:76549},{a:2024,isr:1.447,pm:12.73,pp:8.8,ne:10303,nt:80916}],
+  "Viols et tentatives de viols": [{a:2016,isr:2.087,pm:14.19,pp:6.8,ne:1516,nt:10681},{a:2017,isr:2.123,pm:14.86,pp:7.0,ne:1749,nt:11769},{a:2018,isr:2.011,pm:14.48,pp:7.2,ne:1986,nt:13718},{a:2019,isr:2.053,pm:15.19,pp:7.4,ne:2322,nt:15288},{a:2020,isr:1.903,pm:14.46,pp:7.6,ne:2432,nt:16816},{a:2021,isr:1.819,pm:14.01,pp:7.7,ne:3156,nt:22530},{a:2022,isr:1.803,pm:14.06,pp:7.8,ne:3555,nt:25278},{a:2023,isr:1.688,pm:13.84,pp:8.2,ne:3908,nt:28242},{a:2024,isr:1.558,pm:13.71,pp:8.8,ne:3981,nt:29035}],
+  "Vols avec arme": [{a:2016,isr:2.287,pm:15.55,pp:6.8,ne:891,nt:5731},{a:2017,isr:2.561,pm:17.93,pp:7.0,ne:1071,nt:5974},{a:2018,isr:2.6,pm:18.72,pp:7.2,ne:1051,nt:5615},{a:2019,isr:2.591,pm:19.17,pp:7.4,ne:1040,nt:5426},{a:2020,isr:2.776,pm:21.1,pp:7.6,ne:1065,nt:5048},{a:2021,isr:2.839,pm:21.86,pp:7.7,ne:1079,nt:4937},{a:2022,isr:2.804,pm:21.87,pp:7.8,ne:1094,nt:5003},{a:2023,isr:2.491,pm:20.43,pp:8.2,ne:1038,nt:5080},{a:2024,isr:2.464,pm:21.68,pp:8.8,ne:1099,nt:5070}],
+  "Vols d'accessoires véhicules": [{a:2016,isr:2.344,pm:15.94,pp:6.8,ne:1198,nt:7517},{a:2017,isr:4.293,pm:30.05,pp:7.0,ne:2881,nt:9586},{a:2018,isr:1.71,pm:12.31,pp:7.2,ne:1064,nt:8641},{a:2019,isr:1.676,pm:12.4,pp:7.4,ne:1015,nt:8187},{a:2020,isr:2.184,pm:16.6,pp:7.6,ne:1140,nt:6868},{a:2021,isr:3.403,pm:26.2,pp:7.7,ne:1577,nt:6019},{a:2022,isr:3.442,pm:26.85,pp:7.8,ne:2103,nt:7831},{a:2023,isr:2.609,pm:21.39,pp:8.2,ne:1648,nt:7703},{a:2024,isr:2.38,pm:20.94,pp:8.8,ne:1584,nt:7565}],
+  "Vols dans les véhicules": [{a:2016,isr:2.635,pm:17.92,pp:6.8,ne:4537,nt:25312},{a:2017,isr:3.12,pm:21.84,pp:7.0,ne:5952,nt:27252},{a:2018,isr:3.519,pm:25.34,pp:7.2,ne:7173,nt:28307},{a:2019,isr:3.662,pm:27.1,pp:7.4,ne:6905,nt:25480},{a:2020,isr:4.28,pm:32.53,pp:7.6,ne:7726,nt:23750},{a:2021,isr:4.413,pm:33.98,pp:7.7,ne:7739,nt:22775},{a:2022,isr:4.747,pm:37.03,pp:7.8,ne:8670,nt:23412},{a:2023,isr:4.862,pm:39.87,pp:8.2,ne:8517,nt:21362},{a:2024,isr:4.44,pm:39.07,pp:8.8,ne:9414,nt:24093}],
+  "Vols de véhicule": [{a:2016,isr:1.109,pm:7.54,pp:6.8,ne:1966,nt:26063},{a:2017,isr:1.207,pm:8.45,pp:7.0,ne:1997,nt:23620},{a:2018,isr:1.074,pm:7.73,pp:7.2,ne:1976,nt:25569},{a:2019,isr:1.111,pm:8.22,pp:7.4,ne:1859,nt:22617},{a:2020,isr:1.254,pm:9.53,pp:7.6,ne:1956,nt:20525},{a:2021,isr:1.239,pm:9.54,pp:7.7,ne:1974,nt:20687},{a:2022,isr:1.321,pm:10.3,pp:7.8,ne:2017,nt:19583},{a:2023,isr:1.283,pm:10.52,pp:8.2,ne:2462,nt:23412},{a:2024,isr:1.232,pm:10.84,pp:8.8,ne:2594,nt:23925}],
+  "Vols sans violence": [{a:2016,isr:3.312,pm:22.52,pp:6.8,ne:16557,nt:73516},{a:2017,isr:3.374,pm:23.62,pp:7.0,ne:17835,nt:75509},{a:2018,isr:3.613,pm:26.01,pp:7.2,ne:20201,nt:77679},{a:2019,isr:3.886,pm:28.76,pp:7.4,ne:22026,nt:76580},{a:2020,isr:3.784,pm:28.76,pp:7.6,ne:18782,nt:65298},{a:2021,isr:4.045,pm:31.15,pp:7.7,ne:20593,nt:66110},{a:2022,isr:4.214,pm:32.87,pp:7.8,ne:21292,nt:64785},{a:2023,isr:3.716,pm:30.47,pp:8.2,ne:20005,nt:65652},{a:2024,isr:3.327,pm:29.28,pp:8.8,ne:18525,nt:63258}],
+  "Vols violents sans arme": [{a:2016,isr:3.122,pm:21.23,pp:6.8,ne:4045,nt:19051},{a:2017,isr:3.557,pm:24.9,pp:7.0,ne:4344,nt:17444},{a:2018,isr:4.124,pm:29.69,pp:7.2,ne:5273,nt:17762},{a:2019,isr:3.978,pm:29.44,pp:7.4,ne:5197,nt:17650},{a:2020,isr:4.717,pm:35.85,pp:7.6,ne:5828,nt:16257},{a:2021,isr:4.508,pm:34.71,pp:7.7,ne:5600,nt:16132},{a:2022,isr:4.518,pm:35.24,pp:7.8,ne:5112,nt:14505},{a:2023,isr:3.759,pm:30.82,pp:8.2,ne:4256,nt:13810},{a:2024,isr:3.352,pm:29.5,pp:8.8,ne:3779,nt:12809}],
+};
+
+const YEARS_MEC  = [2016,2017,2018,2019,2020,2021,2022,2023,2024];
+const YEARS_FLUX = [2016,2017,2018,2019,2020,2021,2022,2023];
+const INDICATORS = Object.keys(ISR_SERIES);
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function linreg(xs, ys) {
+  const n = xs.length;
+  const mx = xs.reduce((a,b)=>a+b)/n, my = ys.reduce((a,b)=>a+b)/n;
+  let num=0, den=0;
+  for(let i=0;i<n;i++){num+=(xs[i]-mx)*(ys[i]-my);den+=(xs[i]-mx)**2;}
+  const slope=num/den, intercept=my-slope*mx;
+  const xmin=Math.min(...xs), xmax=Math.max(...xs);
+  return {slope, intercept, xmin, xmax};
+}
+
+// ─── CHART 1 : DUAL AXIS ──────────────────────────────────────────────────────
+(function() {
+  const years = YEARS_FLUX;
+  const fluxVals = years.map(y=>FLUX[y]);
+  const mecVals  = years.map(y=>MEC_ET[y+1]||null);
+
+  new Chart(document.getElementById('cDual').getContext('2d'), {
+    type:'bar',
+    data:{
+      labels: years,
+      datasets:[
+        {
+          type:'bar', label:'Flux titres de séjour (pays tiers)',
+          data: fluxVals, backgroundColor:'#3b82f655', borderColor:'#3b82f6',
+          borderWidth:1.5, borderRadius:4, yAxisID:'y1', order:2
+        },
+        {
+          type:'line', label:'MEC étrangers agrégé (année t+1)',
+          data: mecVals, borderColor:'#ef4444', backgroundColor:'transparent',
+          borderWidth:2.5, pointRadius:5, pointHoverRadius:8,
+          tension:.3, yAxisID:'y2', order:1, spanGaps:true
+        }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{usePointStyle:true,font:{size:11}}},
+        tooltip:{callbacks:{
+          label:(c)=> c.dataset.label.includes('Flux')
+            ? `Flux ${c.label} : ${c.parsed.y.toLocaleString('fr-FR')}`
+            : `MEC étrangers ${parseInt(c.label)+1} : ${(c.parsed.y||0).toLocaleString('fr-FR')}`
+        }}
+      },
+      scales:{
+        y1:{position:'left',title:{display:true,text:'Titres de séjour délivrés',font:{size:10}},
+            ticks:{callback:v=>(v/1000).toFixed(0)+'k',font:{size:10}},grid:{color:'#f1f5f9'}},
+        y2:{position:'right',title:{display:true,text:'MEC étrangers (année suiv.)',font:{size:10}},
+            ticks:{callback:v=>(v/1000).toFixed(0)+'k',font:{size:10}},grid:{display:false}}
+      }
+    }
+  });
+})();
+
+// ─── CHART 2 : SCATTER LAGGÉ AVEC RÉGRESSION ─────────────────────────────────
+(function() {
+  const pairs = YEARS_FLUX.map(y=>({
+    x: FLUX[y], y: MEC_ET[y+1], yr: y, covid: y===2020
+  })).filter(p=>p.y!=null);
+
+  const reg = linreg(pairs.map(p=>p.x), pairs.map(p=>p.y));
+  const regLine = [
+    {x: reg.xmin, y: reg.slope*reg.xmin + reg.intercept},
+    {x: reg.xmax, y: reg.slope*reg.xmax + reg.intercept}
+  ];
+  // Without covid
+  const noCovid = pairs.filter(p=>!p.covid);
+  const reg2 = linreg(noCovid.map(p=>p.x), noCovid.map(p=>p.y));
+  const reg2Line = [
+    {x: reg2.xmin, y: reg2.slope*reg2.xmin + reg2.intercept},
+    {x: reg2.xmax, y: reg2.slope*reg2.xmax + reg2.intercept}
+  ];
+
+  document.getElementById('anno-corr').textContent =
+    'r=+0,66 (p=0,075) avec 2020 · r=+0,85 (p=0,016) sans 2020 — N=8/7 paires';
+
+  new Chart(document.getElementById('cScatter').getContext('2d'), {
+    data:{
+      datasets:[
+        {
+          type:'scatter', label:'Année (avec 2020)',
+          data: pairs.map(p=>({x:p.x,y:p.y,yr:p.yr,covid:p.covid})),
+          backgroundColor: pairs.map(p=>p.covid?'#f59e0bcc':'#3b82f6cc'),
+          borderColor: pairs.map(p=>p.covid?'#d97706':'#2563eb'),
+          pointRadius:7, pointHoverRadius:10
+        },
+        {
+          type:'line', label:'Régression OLS (avec 2020)',
+          data: regLine, borderColor:'#94a3b8', borderDash:[5,4],
+          borderWidth:1.5, pointRadius:0, fill:false
+        },
+        {
+          type:'line', label:'Régression OLS (sans 2020)',
+          data: reg2Line, borderColor:'#ef4444', borderDash:[3,3],
+          borderWidth:2, pointRadius:0, fill:false
+        }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'top',labels:{usePointStyle:true,font:{size:10}}},
+        tooltip:{callbacks:{
+          label:(c)=>{
+            if(c.dataset.label.includes('OLS')) return null;
+            const d=c.raw;
+            return [`Flux ${d.yr} → MEC ${d.yr+1}`,
+                    `Flux : ${d.x.toLocaleString('fr-FR')}`,
+                    `MEC t+1 : ${d.y.toLocaleString('fr-FR')}`,
+                    d.covid?'⚠ Année covid':''];
+          }
+        }}
+      },
+      scales:{
+        x:{title:{display:true,text:'Flux titres de séjour (année t)',font:{size:11}},
+           ticks:{callback:v=>(v/1000).toFixed(0)+'k',font:{size:10}},grid:{color:'#f1f5f9'}},
+        y:{title:{display:true,text:'MEC étrangers agrégé (année t+1)',font:{size:11}},
+           ticks:{callback:v=>(v/1000).toFixed(0)+'k',font:{size:10}},grid:{color:'#f1f5f9'}}
+      }
+    }
+  });
+})();
+
+// ─── CHART 3 : TAUX COMPARATIF ────────────────────────────────────────────────
+(function(){
+  const yrs = YEARS_MEC;
+  const tauxEt = yrs.map(y=> MEC_ET[y]/(NB_ET_RES[y]/1000));
+  const tauxFr = yrs.map(y=> {
+    const nbFr = POP_FR_TOT[y]-NB_ET_RES[y];
+    return MEC_FR[y]/(nbFr/1000);
+  });
+  const ratio = yrs.map((_,i)=> tauxEt[i]/tauxFr[i]);
+
+  new Chart(document.getElementById('cTaux').getContext('2d'), {
+    type:'line',
+    data:{
+      labels:yrs,
+      datasets:[
+        {label:'Taux MEC étrangers (/1 000 hab. étr.)',data:tauxEt,
+         borderColor:'#ef4444',backgroundColor:'#ef444415',fill:true,
+         borderWidth:2.5,tension:.3,pointRadius:4,yAxisID:'y1'},
+        {label:'Taux MEC Français (/1 000 hab. fr.)',data:tauxFr,
+         borderColor:'#3b82f6',backgroundColor:'#3b82f615',fill:true,
+         borderWidth:2.5,tension:.3,pointRadius:4,yAxisID:'y1'},
+        {label:'Ratio (étr./fr.)',data:ratio,
+         borderColor:'#f59e0b',backgroundColor:'transparent',
+         borderWidth:2,borderDash:[5,3],tension:.3,pointRadius:3,yAxisID:'y2'}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,font:{size:11}}}},
+      scales:{
+        y1:{title:{display:true,text:'Taux /1 000',font:{size:10}},
+            grid:{color:'#f1f5f9'},ticks:{font:{size:10}}},
+        y2:{position:'right',title:{display:true,text:'Ratio ×',font:{size:10}},
+            grid:{display:false},ticks:{callback:v=>'×'+v.toFixed(2),font:{size:10}}}
+      }
+    }
+  });
+})();
+
+// ─── CHART 4 : INDICE BASE 100 ────────────────────────────────────────────────
+(function(){
+  const yrs = [2016,2017,2018,2019,2020,2021,2022,2023];
+  const base = (arr)=> arr.map(v=>v/arr[0]*100);
+  const fluxArr = yrs.map(y=>FLUX[y]);
+  const resArr  = yrs.map(y=>NB_ET_RES[y]);
+  const mecArr  = yrs.map(y=>MEC_ET[y]);
+  const tauxArr = yrs.map(y=>MEC_ET[y]/(NB_ET_RES[y]/1000));
+
+  new Chart(document.getElementById('cBase100').getContext('2d'), {
+    type:'line',
+    data:{
+      labels:yrs,
+      datasets:[
+        {label:'Flux titres de séjour',data:base(fluxArr),
+         borderColor:'#3b82f6',backgroundColor:'transparent',
+         borderWidth:2.5,tension:.3,pointRadius:4},
+        {label:'Résidents étrangers',data:base(resArr),
+         borderColor:'#10b981',backgroundColor:'transparent',
+         borderWidth:2.5,tension:.3,pointRadius:4},
+        {label:'MEC étrangers (total)',data:base(mecArr),
+         borderColor:'#ef4444',backgroundColor:'transparent',
+         borderWidth:2.5,tension:.3,pointRadius:4},
+        {label:'Taux MEC/1 000 étr.',data:base(tauxArr),
+         borderColor:'#f59e0b',backgroundColor:'transparent',
+         borderWidth:2,borderDash:[4,3],tension:.3,pointRadius:3}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{usePointStyle:true,font:{size:11}}},
+        tooltip:{callbacks:{label:(c)=>`${c.dataset.label} : ${c.parsed.y.toFixed(1)}`}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11}}},
+        y:{title:{display:true,text:'Indice (2016 = 100)',font:{size:10}},
+           grid:{color:'#f1f5f9'},ticks:{font:{size:10}},
+           afterDataLimits:(ax)=>{ ax.min=Math.min(ax.min,85); }}
+      }
+    }
+  });
+})();
+
+// ─── CHART 5 : CORRÉLATIONS PAR INDICATEUR ───────────────────────────────────
+(function(){
+  const labels = CORR_DATA.map(d=> d.ind.length>32 ? d.ind.substring(0,30)+'…' : d.ind);
+  const vals   = CORR_DATA.map(d=>d.r);
+  const colors = CORR_DATA.map(d=>{
+    if(!d.sig) return '#94a3b8cc';
+    return d.r > 0 ? '#ef4444cc' : '#3b82f6cc';
+  });
+  const borders= CORR_DATA.map(d=>{
+    if(!d.sig) return '#64748b';
+    return d.r > 0 ? '#b91c1c' : '#1d4ed8';
+  });
+
+  new Chart(document.getElementById('cCorr').getContext('2d'), {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label:'r de Pearson',data:vals,
+        backgroundColor:colors,borderColor:borders,
+        borderWidth:1,borderRadius:3
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          title:(items)=>CORR_DATA[items[0].dataIndex].ind,
+          label:(c)=>{
+            const d=CORR_DATA[c.dataIndex];
+            return [`r = ${d.r.toFixed(3)}`,`p = ${d.p.toFixed(4)}`,d.sig?'✓ Significatif (p<0,05)':'○ Non significatif'];
+          }
+        }},
+        annotation:{
+          annotations:{
+            zero:{type:'line',xMin:0,xMax:0,borderColor:'#475569',borderWidth:1.5}
+          }
+        }
+      },
+      scales:{
+        x:{min:-1,max:1,title:{display:true,text:'r de Pearson (flux t → MEC t+1, N=8)',font:{size:10}},
+           grid:{color:'#f1f5f9'},ticks:{font:{size:10},callback:v=>v.toFixed(1)}},
+        y:{grid:{display:false},ticks:{font:{size:10}}}
+      }
+    }
+  });
+})();
+
+// ─── CHART 6 : % MEC vs % POP PAR INDICATEUR ─────────────────────────────────
+let chartPct = null;
+
+function initSelector(){
+  const sel = document.getElementById('sel-ind');
+  INDICATORS.forEach(ind=>{
+    const o = document.createElement('option');
+    o.value=ind; o.textContent=ind;
+    sel.appendChild(o);
+  });
+  sel.value = INDICATORS[0];
+}
+
+window.updatePctChart = function(){
+  const ind = document.getElementById('sel-ind').value;
+  const rows = ISR_SERIES[ind];
+  const yrs  = rows.map(r=>r.a);
+  const pmec = rows.map(r=>r.pm);
+  const ppop = rows.map(r=>r.pp);
+
+  const data = {
+    labels: yrs,
+    datasets:[
+      {label:'% MEC étrangers',data:pmec,backgroundColor:'#ef444488',borderColor:'#ef4444',borderWidth:1.5,borderRadius:3},
+      {label:'% étrangers dans la pop.',data:ppop,backgroundColor:'#3b82f688',borderColor:'#3b82f6',borderWidth:1.5,borderRadius:3}
+    ]
+  };
+
+  if(chartPct){
+    chartPct.data = data;
+    chartPct.update('none');
+  } else {
+    chartPct = new Chart(document.getElementById('cPct').getContext('2d'), {
+      type:'bar',
+      data,
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{position:'top',labels:{usePointStyle:true,font:{size:11}}},
+          tooltip:{callbacks:{
+            afterBody:(items)=>{
+              const i=items[0].dataIndex;
+              const pm=items.find(t=>t.datasetIndex===0)?.parsed.y;
+              const pp=items.find(t=>t.datasetIndex===1)?.parsed.y;
+              if(pm&&pp) return [`ISR ≈ ${(pm/pp).toFixed(2)}`];
+              return [];
+            }
+          }}
+        },
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:11}}},
+          y:{title:{display:true,text:'Pourcentage (%)',font:{size:10}},
+             grid:{color:'#f1f5f9'},ticks:{callback:v=>v+'%',font:{size:10}}}
+        }
+      }
+    });
+  }
+};
+
+// ─── CHART 7 : CROISSANCE MEC ÉTRANGERS BASE 100 PAR INDICATEUR ──────────────
+(function(){
+  const yrs = [2016,2017,2018,2019,2020,2021,2022,2023,2024];
+  // Top 8 indicateurs par ratio de croissance 2016→2024
+  const growthInds = INDICATORS.map(ind=>{
+    const rows = ISR_SERIES[ind];
+    const v16 = rows.find(r=>r.a===2016)?.ne;
+    const v24 = rows.find(r=>r.a===2024)?.ne;
+    return {ind, ratio: (v16&&v24) ? v24/v16 : 0};
+  }).sort((a,b)=>b.ratio-a.ratio).slice(0,8).map(x=>x.ind);
+
+  const palette=['#3b82f6','#ef4444','#f59e0b','#10b981','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
+
+  const datasets = growthInds.map((ind,i)=>{
+    const rows = ISR_SERIES[ind];
+    const base = rows.find(r=>r.a===2016)?.ne || 1;
+    return {
+      label: ind.length>30 ? ind.substring(0,28)+'…' : ind,
+      data: yrs.map(y=>{ const r=rows.find(rr=>rr.a===y); return r?.ne ? Math.round(r.ne/base*100) : null; }),
+      borderColor: palette[i], backgroundColor:'transparent',
+      borderWidth:2, tension:.3, pointRadius:3, pointHoverRadius:6, spanGaps:true
+    };
+  });
+
+  new Chart(document.getElementById('cGrowth').getContext('2d'), {
+    type:'line',
+    data:{labels:yrs, datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'right',labels:{usePointStyle:true,font:{size:10},boxWidth:10}},
+        tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${c.parsed.y}`}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11}}},
+        y:{title:{display:true,text:'Indice base 100 (2016)',font:{size:10}},
+           grid:{color:'#f1f5f9'},ticks:{font:{size:10}}}
+      }
+    }
+  });
+})();
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+initSelector();
+updatePctChart();
+</script>
+</body>
+</html>
