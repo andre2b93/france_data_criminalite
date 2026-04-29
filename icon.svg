@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="France Données Criminalité">
+  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <g transform="translate(96 144)">
+    <rect x="0"   y="0" width="106" height="224" fill="#0055A4"/>
+    <rect x="106" y="0" width="106" height="224" fill="#FFFFFF"/>
+    <rect x="212" y="0" width="106" height="224" fill="#EF4135"/>
+  </g>
+  <g fill="#e2e8f0" transform="translate(140 296)">
+    <rect x="0"   y="48" width="36" height="48"/>
+    <rect x="56"  y="24" width="36" height="72"/>
+    <rect x="112" y="0"  width="36" height="96"/>
+    <rect x="168" y="32" width="36" height="64"/>
+    <rect x="224" y="16" width="36" height="80"/>
+  </g>
+</svg>
