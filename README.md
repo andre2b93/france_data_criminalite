@@ -4,7 +4,34 @@ Portail de tableaux de bord interactifs analysant la criminalité en France et s
 
 ## Comment consulter
 
-Aucun build, aucune dépendance à installer. Ouvrir directement `portail_analyse.html` dans un navigateur — c'est la page d'accueil avec une navigation latérale vers l'ensemble des tableaux de bord.
+### En ligne (recommandé — fonctionne aussi sur mobile)
+
+Une fois GitHub Pages activé sur ce dépôt, le portail est accessible à :
+
+```
+https://andre2b93.github.io/france_data_criminalite/
+```
+
+Il suffit d'ouvrir cette URL dans un navigateur (Firefox, Chrome, Safari, mobile ou desktop). `index.html` redirige automatiquement vers `portail_analyse.html`.
+
+#### Activer GitHub Pages (à faire une fois)
+
+1. Sur GitHub, ouvrir **Settings → Pages**.
+2. Sous **Source**, choisir **Deploy from a branch**.
+3. Sélectionner la branche `main` et le dossier `/ (root)`, puis **Save**.
+4. Attendre ~1 minute, puis rafraîchir : l'URL ci-dessus devient active.
+
+#### Sur Firefox Android — installer comme une appli
+
+1. Ouvrir l'URL ci-dessus dans Firefox sur Android.
+2. Menu **⋮** → **Installer** (ou **Ajouter à l'écran d'accueil**).
+3. Une icône apparaît sur l'écran d'accueil ; un tap ouvre directement le portail en plein écran.
+
+Le manifeste PWA (`manifest.webmanifest`) et l'icône (`icon.svg`) sont déjà fournis dans le dépôt.
+
+### En local
+
+Aucun build, aucune dépendance à installer. Ouvrir directement `portail_analyse.html` dans un navigateur :
 
 ```
 # depuis la racine du dépôt
@@ -56,3 +83,15 @@ start portail_analyse.html      # Windows
 - **Chart.js** (chargé via CDN) pour les graphiques en ligne, barres et secteurs.
 - **D3.js** (chargé via CDN) pour les cartes choroplèthes.
 - Filtres interactifs côté client (sélection d'année, de catégorie, tris de tableaux).
+- **PWA minimal** (`manifest.webmanifest` + `icon.svg`) pour l'installation sur l'écran d'accueil mobile via Firefox Android / Chrome.
+
+## Structure du dépôt
+
+```
+index.html                 → redirection vers portail_analyse.html
+portail_analyse.html       → page d'accueil (navigation latérale)
+*_dashboard.html, dashboard_*.html, criminalite_*.html, nationalite_dashboard.html
+                           → 9 tableaux de bord
+manifest.webmanifest       → manifeste PWA (installation mobile)
+icon.svg                   → icône du portail / de la PWA
+```
